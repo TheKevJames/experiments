@@ -1,7 +1,7 @@
 Various Experiments
 ===================
 
-This repository is a collection of various one-of experiments.
+This repository is a collection of various one-off experiments.
 
 - `Guild Wars 2 Scripts`_
 - `Jaro-Winkler Speed Comparisons`_
