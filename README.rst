@@ -3,8 +3,10 @@ Various Experiments
 
 This repository is a collection of various one-of experiments.
 
-- `Jaro-Winkler Comparisons`_
-- `String Manips`_
+- `Guild Wars 2 Scripts`_
+- `Jaro-Winkler Speed Comparisons`_
+- `Mini String Manipulations`_
 
-.. _Jaro-Winkler Comparisons: https://github.com/TheKevJames/experiments/tree/master/jaro-winkler-comparisons
-.. _String Manips: https://github.com/TheKevJames/experiments/tree/master/string-manips
+.. _Guild Wars 2 Scripts: https://github.com/TheKevJames/experiments/tree/master/gw2
+.. _Jaro-Winkler Speed Comparisons: https://github.com/TheKevJames/experiments/tree/master/jaro-winkler-comparisons
+.. _Mini String Manipulations: https://github.com/TheKevJames/experiments/tree/master/string-manips
