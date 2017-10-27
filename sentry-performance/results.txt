@@ -1,0 +1,25 @@
+Aggregate Results over 100000 runs
+
+Log Handler
+Average: 0.022822360080ms
+Median:  0.021441141143ms
+Min:     0.019082101062ms
+Max:     0.572933116928ms
+
+Log Handler with Sentry
+Average: 0.048399981565ms
+Median:  0.046136090532ms
+Min:     0.042889034376ms
+Max:     0.364857958630ms
+
+Exception Handler
+Average: 0.000415447431ms
+Median:  0.000399071723ms
+Min:     0.000362051651ms
+Max:     0.053381081671ms
+
+Exception Handler with Sentry
+Average: 0.001796687038ms
+Median:  0.001657987013ms
+Min:     0.001590000466ms
+Max:     0.047820154577ms
