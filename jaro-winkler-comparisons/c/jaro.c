@@ -91,4 +91,3 @@ double jaro_winkler_distance(const char *s, const char *a) {
 
     return dw;
 }
-

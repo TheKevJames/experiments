@@ -1,11 +1,12 @@
 repository:
   name: experiments
-  description: Various One-Off Experiments
+  description: one-off experiments
   private: false
 
   has_issues: true
   has_projects: false
   has_wiki: false
+  has_downloads: false
 
   allow_merge_commit: false
   allow_rebase_merge: true
