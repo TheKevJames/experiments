@@ -16,7 +16,6 @@ def tests(count):
             raise ValueError('this is an exception')
         except ValueError:
             SENTRY.captureException()
-            pass
         end = time.perf_counter()
 
         yield end - start
@@ -25,7 +24,7 @@ def tests(count):
 if __name__ == '__main__':
     times = list(tests(NUM_TESTS))
 
-    print('Average: {0:.12f}ms'.format(statistics.mean(times) * 1000))
-    print('Median:  {0:.12f}ms'.format(statistics.median(times) * 1000))
-    print('Min:     {0:.12f}ms'.format(min(times) * 1000))
-    print('Max:     {0:.12f}ms'.format(max(times) * 1000))
+    print('Average: {:.12f}ms'.format(statistics.mean(times) * 1000))
+    print('Median:  {:.12f}ms'.format(statistics.median(times) * 1000))
+    print('Min:     {:.12f}ms'.format(min(times) * 1000))
+    print('Max:     {:.12f}ms'.format(max(times) * 1000))

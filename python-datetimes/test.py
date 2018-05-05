@@ -2,8 +2,8 @@
 import calendar
 import datetime
 import inspect
-import time
 import sys
+import time
 
 if sys.version[0] == '2':
     import tzlocal
