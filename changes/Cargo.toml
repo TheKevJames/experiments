@@ -1,0 +1,27 @@
+[package]
+name = "changes"
+version = "0.0.0"
+authors = ["Kevin James <KevinJames@thekev.in>"]
+
+description = "changes is a utility for retrieving changelogs"
+homepage = "https://github.com/TheKevJames/experiments/blob/master/changes"
+repository = "https://github.com/TheKevJames/experiments/blob/master/changes"
+readme = "README.rst"
+
+keywords = ["changelog"]
+categories = ["command-line-utilities"]
+license = "MIT"
+
+[badges]
+circle-ci = { repository = "TheKevJames/experiments", branch = "master" }
+is-it-maintained-issue-resolution = { repository = "TheKevJames/experiments" }
+is-it-maintained-open-issues = { repository = "TheKevJames/experiments" }
+maintenance = { status = "experimental" }
+
+[dependencies]
+clap = "2.32"
+hyper = "0.12"
+hyper-tls = "0.3"
+# pulldown-cmark = "0.1"
+serde_json = "1.0"
+tokio-core = "0.1"
