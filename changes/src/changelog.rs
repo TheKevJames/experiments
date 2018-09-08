@@ -28,15 +28,20 @@ impl<'a, 'b> Changelog<'a, 'b> {
                 Some(x) => {
                     eprintln!("unsupported changelog extension: {}", x);
                     std::process::exit(1);
-                },
+                }
                 None => "markdown",
-            }
+            },
         }
     }
 
     pub fn retrieve(&mut self) {
         // TODO: do this render->raw replacement in github.rs
-        let uri = self.url.replace("github.com", "raw.githubusercontent.com").replace("/blob", "").parse().unwrap();
+        let uri = self
+            .url
+            .replace("github.com", "raw.githubusercontent.com")
+            .replace("/blob", "")
+            .parse()
+            .unwrap();
         let fut = fetch_text(uri).and_then(|result| Ok(result));
         self.raw = match tokio_core::reactor::Core::new() {
             Ok(mut core) => match core.run(fut) {

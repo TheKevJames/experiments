@@ -26,7 +26,14 @@ fn fetch(url: hyper::Uri) -> impl Future<Item = hyper::Chunk, Error = FetchError
 
     client
         .get(url)
-        .and_then(|res| res.into_body().concat2())
+        .and_then(|res| {
+            if res.status().is_success() {
+                res.into_body().concat2()
+            } else {
+                // TODO: return error code as FetchError
+                panic!("http error code: {}", res.status().as_u16())
+            }
+        })
         .from_err::<FetchError>()
 }
 
