@@ -20,13 +20,19 @@ class GitHub(Base):
         return h
 
     @classmethod
-    async def _get_paths(cls, owner: str, repo: str, *, path: str = '',
-                         session=aiohttp.ClientSession) -> dict:
-        url = f'https://api.github.com/repos/{owner}/{repo}/contents/{path}'
+    async def _get(cls, owner: str, repo: str, route: str, *,
+                   session: aiohttp.ClientSession) -> dict:
+        url = f'https://api.github.com/repos/{owner}/{repo}/{route}'
 
         resp = await session.get(url, headers=cls._headers())
         resp.raise_for_status()
-        files = await resp.json()
+        return await resp.json()
+
+    @classmethod
+    async def _get_paths(cls, owner: str, repo: str, *, path: str = '',
+                         session: aiohttp.ClientSession) -> dict:
+        files = await cls._get(owner, repo, f'contents/{path}',
+                               session=session)
 
         futures = []
         for folder in {f['path'] for f in files if f['type'] == 'dir'}:
@@ -53,6 +59,12 @@ class GitHub(Base):
         *_, owner, repo = url.rsplit('/', 2)
 
         files = await cls._get_paths(owner, repo, path=path, session=session)
+        if not files:
+            releases = await cls._get(owner, repo, 'releases', session=session)
+            # TODO: there doesn't seem to be a programatic way to get release
+            # notes contents...
+            return releases[0]['html_url']
+
         # TODO: pick best
         return cls.get_url(list(files)[0])
 

@@ -14,6 +14,15 @@ async def test_coveralls():
 
 
 @pytest.mark.asyncio
+async def test_gcloud_rest():
+    # PyPI info -> GitHub:/ -> GitHub Releases
+    async with aiohttp.ClientSession() as s:
+        clog = await changes.retrieve('gcloud-rest', source='pypi', session=s)
+
+    assert clog
+
+
+@pytest.mark.asyncio
 async def test_hypothesis():
     # PyPI info -> GitHub:/hypothesis-python -> ./docs/CHANGELOG.rst
     async with aiohttp.ClientSession() as s:
