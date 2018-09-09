@@ -1,28 +1,30 @@
 import asyncio
+import os
 
 import aiohttp
 
 from .base import Base
 
 
-FILENAMES = {'changes', 'changelog'}
+TOKEN = os.environ.get('GITHUB_TOKEN')
 
 
 class GitHub(Base):
     hints = {'github.com', 'githubusercontent.com'}
 
     @staticmethod
-    def _to_canonical_url(url: str) -> str:
-        return url\
-            .replace('github.com', 'raw.githubusercontent.com')\
-            .replace('/blob', '')
+    def _headers() -> dict:
+        h = {}
+        if TOKEN:
+            h['Authorization'] = f'token {TOKEN}'
+        return h
 
     @classmethod
     async def _get_paths(cls, owner: str, repo: str, *, path: str = '',
                          session=aiohttp.ClientSession) -> dict:
         url = f'https://api.github.com/repos/{owner}/{repo}/contents/{path}'
 
-        resp = await session.get(url)
+        resp = await session.get(url, headers=cls._headers())
         resp.raise_for_status()
         files = await resp.json()
 
@@ -52,4 +54,10 @@ class GitHub(Base):
 
         files = await cls._get_paths(owner, repo, path=path, session=session)
         # TODO: pick best
-        return cls._to_canonical_url(list(files)[0])
+        return cls.get_url(list(files)[0])
+
+    @staticmethod
+    def get_url(url: str) -> str:
+        return url\
+            .replace('github.com', 'raw.githubusercontent.com')\
+            .replace('/blob', '')

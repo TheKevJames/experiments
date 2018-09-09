@@ -1,4 +1,12 @@
+import asyncio
+import logging
+
 import aiohttp
+
+from .indexes import get
+
+
+log = logging.getLogger(__name__)
 
 
 class Clog:
@@ -16,3 +24,21 @@ class Clog:
         raw = await resp.text()
 
         return cls(raw=raw, url=url)
+
+
+async def retrieve(name: str, *, source: str = None,
+                   session: aiohttp.ClientSession) -> Clog:
+    futures = []
+    for index in get():
+        if source and source not in index.hints:
+            continue
+
+        futures.append(index.find_url(name, session=session))
+
+    urls = {u for ul in await asyncio.gather(*futures) for u in ul if u}
+
+    # TODO: return best rather than first
+    for url in urls:
+        return await Clog.init(url, session=session)
+
+    log.error(f'could not find changelog for {name}')

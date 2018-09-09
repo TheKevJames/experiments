@@ -8,41 +8,28 @@ Options:
     -h --help           Display this help.
 """
 import asyncio
-import logging
 import sys
 
 import aiohttp
 import docopt
 
-from .clog import Clog
-from .indexes import get
+from .clog import retrieve
 from .version import __version__
-
-
-log = logging.getLogger('changes')
 
 
 async def main() -> None:
     args = docopt.docopt(__doc__, version=__version__)
 
+    name = args['NAME']
+    source = args.get('--source')
     async with aiohttp.ClientSession() as session:
-        futures = []
-        for index in get():
-            if args.get('--source') and args['--source'] not in index.hints:
-                continue
+        clog = await retrieve(name, source=source, session=session)
 
-            futures.append(index.find_url(args['NAME'], session=session))
+    if not clog:
+        sys.exit(1)
 
-        urls = {u for ul in await asyncio.gather(*futures) for u in ul if u}
+    print(clog)
 
-        # TODO: return best
-        for url in urls:
-            clog = await Clog.init(url, session=session)
-            print(clog)
-            return
-
-    log.error(f'could not find changelog for {args["NAME"]}')
-    sys.exit(1)
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

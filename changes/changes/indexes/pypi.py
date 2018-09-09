@@ -6,6 +6,7 @@ import aiohttp
 
 from .base import Base
 from ..hosts import find_clog
+from ..hosts import get_url
 
 
 log = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ class PyPI(Base):
 
             for k in {'changes', 'Changes', 'changelog', 'Changelog'}:
                 if project_urls.get(k):
-                    candidates.add(project_urls[k])
+                    candidates.add(get_url(project_urls[k]))
 
             repos = {info['home_page']}
             for k in {'source', 'Source', 'repo', 'Repo'}:
