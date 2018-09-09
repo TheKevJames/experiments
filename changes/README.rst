@@ -7,9 +7,6 @@ package. That means:
 - language packages (``pip``, ``gem``, ``cargo``, ...)
 - ad-hoc scripts (``curl https://foo.bar > /bin/foobar``, ...)
 
-Its also a convenient excuse for me to properly learn Rust / wrestle with the
-borrow-checker.
-
 This project is a Work In-Progress! Expect very little for now and avoid the
 disappointment.
 
@@ -26,10 +23,10 @@ The rough end goal is to have::
 where::
 
     OPTIONS:
-        <NAME>                   Sets the name (of package / command) to search.
-        -s, --source <SOURCE>    Provides a source language restriction/hint.
-        -f, --from <FROM>        Outputs the Changelog beginning with this version.
-        -t, --to <FROM>          Outputs the Changelog ending with this version.
+      <NAME>                   Sets the name (of package / command) to search.
+      -s, --source <SOURCE>    Provides a source language restriction/hint.
+      -f, --from <FROM>        Outputs the Changelog beginning with this version.
+      -t, --to <FROM>          Outputs the Changelog ending with this version.
 
 Plan
 ----

@@ -1,0 +1,2 @@
+aiohttp==3.4.4
+docopt==0.6.2
