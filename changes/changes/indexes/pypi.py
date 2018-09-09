@@ -35,7 +35,7 @@ class PyPI(Base):
                     candidates.add(get_url(project_urls[k]))
 
             repos = {info['home_page']}
-            for k in {'source', 'Source', 'repo', 'Repo'}:
+            for k in {'code', 'Code', 'source', 'Source', 'repo', 'Repo'}:
                 if project_urls.get(k):
                     repos.add(project_urls[k])
 

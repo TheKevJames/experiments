@@ -68,6 +68,8 @@ class GitHub(Base):
         # TODO: pick best
         return cls.get_url(list(files)[0])
 
+        # TODO: consider fallback to commit log
+
     @staticmethod
     def get_url(url: str) -> str:
         return url\
