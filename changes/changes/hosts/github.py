@@ -56,7 +56,7 @@ class GitHub(Base):
         else:
             path = ''
 
-        *_, owner, repo = url.rsplit('/', 2)
+        *_, owner, repo = url.strip('/').rsplit('/', 2)
 
         files = await cls._get_paths(owner, repo, path=path, session=session)
         if not files:
