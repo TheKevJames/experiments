@@ -3,7 +3,6 @@ Various Experiments
 
 This repository is a collection of various one-off experiments.
 
-- `Changelog Finder`_
 - `Docker Image Size Tests`_
 - `Guild Wars 2 Scripts`_
 - `Jaro-Winkler Speed Comparisons`_
@@ -12,7 +11,6 @@ This repository is a collection of various one-off experiments.
 - `Python Datetimes`_ (see associated `blog post`_)
 - `Sentry Instrumentation Performance Analysis`_
 
-.. _Changelog Finder: https://github.com/TheKevJames/experiments/tree/master/changes
 .. _Docker Image Size Tests: https://github.com/TheKevJames/experiments/tree/master/docker-size
 .. _Guild Wars 2 Scripts: https://github.com/TheKevJames/experiments/tree/master/gw2
 .. _Jaro-Winkler Speed Comparisons: https://github.com/TheKevJames/experiments/tree/master/jaro-winkler-comparisons
