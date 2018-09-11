@@ -1,8 +1,8 @@
-changes
-=======
+getchanges
+==========
 
-``changes`` aims to be a CLI tool for finding and retrieving changelogs for any
-package. That means:
+``getchanges`` aims to be a CLI tool for finding and retrieving changelogs for
+any package. That means:
 - system packages (``apt``, ``zypper``, ``pacman``, ``brew``, ...)
 - language packages (``pip``, ``gem``, ``cargo``, ...)
 - ad-hoc scripts (``curl https://foo.bar > /bin/foobar``, ...)

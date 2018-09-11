@@ -17,7 +17,7 @@ from .clog import retrieve
 from .version import __version__
 
 
-async def main() -> None:
+async def run() -> None:
     args = docopt.docopt(__doc__, version=__version__)
 
     name = args['NAME']
@@ -31,6 +31,10 @@ async def main() -> None:
     print(clog)
 
 
-if __name__ == '__main__':
+def main() -> None:
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    loop.run_until_complete(run())
+
+
+if __name__ == '__main__':
+    main()
