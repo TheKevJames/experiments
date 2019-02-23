@@ -153,6 +153,7 @@ def print_table():
         'aware_datetime_py2': 'Aware `datetime` (Py2)',
         'aware_datetime_py3': 'Aware `datetime` (Py3)',
     }
+
     def display_code(lhs, rhs):
         if not TABLE[lhs].get(rhs):
             return '-'  # indirect

@@ -13,6 +13,7 @@ def main():
             ords[i] = new
     print ''.join([chr(l) for l in ords])
 
+
 if __name__ == '__main__':
     try:
         while True:

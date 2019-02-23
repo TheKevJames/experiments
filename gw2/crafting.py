@@ -23,6 +23,8 @@ def as_gold(value):
 
 # TODO: merge with fractals.py
 LOOKUP_PRICE = {}
+
+
 def get_price(iid):
     price = LOOKUP_PRICE.get(iid)
     if price:

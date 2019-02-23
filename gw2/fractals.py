@@ -21,6 +21,8 @@ def as_gold(value):
 
 
 LOOKUP_ID = {}
+
+
 def get_id(name):
     iid = LOOKUP_ID.get(name)
     if iid:
@@ -43,6 +45,8 @@ def get_id(name):
 
 # TODO: ensure listings > amount selling
 LOOKUP_PRICE = {}
+
+
 def get_price(iid):
     price = LOOKUP_PRICE.get(iid)
     if price:
