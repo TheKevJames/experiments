@@ -89,7 +89,8 @@ MKL libs into our test image:
     $ apt-get install -qy intel-mkl-2019.4-070
 
 Note that this does nothing until we re-compile (again) Tensorflow to use those
-libraries (with ``--config=mkl``).
+libraries (with ``--config=mkl``). Note that at this point the Tensorflow wheel
+has gotten too big for git to handle... to `Gemfury`_ we go!
 
 .. image:: results/mkl.png
 
@@ -118,8 +119,9 @@ we fix that up?
 
     export OMP_NUM_THREADS=1
 
-.. image:: results/mkl_single_thread_opm.png
+.. image:: results/mkl_single_thread_omp.png
 
 There we go! A speedup of ~5.9x, that's fantastic progress.
 
 .. _g2p_en: https://github.com/Kyubyong/g2p/tree/7caf9d695b178c83f9c3d3e16c3f0a4f4d4d03a2
+.. _Gemfury: https://manage.fury.io/dashboard/thekevjames
