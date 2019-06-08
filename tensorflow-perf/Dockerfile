@@ -16,6 +16,11 @@ COPY tensorflow /src/tensorflow
 COPY requirements.txt /src/requirements.txt
 RUN pip install --no-cache-dir -r /src/requirements.txt
 
+RUN pip install --no-cache-dir cython && \
+    git clone --single-branch --depth 1 https://github.com/rkern/line_profiler.git && \
+    find line_profiler -name '*.pyx' -exec cython {} \; && \
+    pip install ./line_profiler
+
 COPY MANIFEST.in /src
 COPY g2p /src/g2p
 COPY setup.py /src

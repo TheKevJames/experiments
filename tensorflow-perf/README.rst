@@ -322,9 +322,97 @@ been hoping for more.
 
 .. image:: results/optimizedmodel.png
 
+There's a few other transformations which could be helpful in optimizing
+performance, but do so at the expense of accuracy, which is a whole can of
+worms I don't want to open at the point. If you're interested, grep for
+"quantize" in the Graph Transformation docs.
+
+Back to Profiling
+^^^^^^^^^^^^^^^^^
+
+That about covers all I know about optimizing Tensorflow itself -- what about
+the rest of our codebase? Let's do some more profiling -- this time with the
+`line_profiler`_ module, since getting a line-by-line look at the
+``g2p.predict`` method will hopefully show us something exciting.
+
+.. code-block:: console
+
+    $ docker run --rm -it \
+          --cpus=1 --memory=4G \
+          tfopt \
+          kernprof -lv /src/profile.py
+    Wrote profile results to profile.py.lprof
+    Timer unit: 1e-06 s
+
+    Total time: 12.6606 s
+    File: /src/g2p/predict.py
+    Function: predict at line 12
+
+    Line #      Hits         Time  Per Hit   % Time  Line Contents
+    ==============================================================
+        12                                           @profile
+        13                                           def predict(text: str) -> typing.List[str]:
+        14        70        808.0     11.5      0.0      words = [w.lower() for w in text.split()]
+        15        70        144.0      2.1      0.0      if len(words) > MAX_LEN:
+        16                                                   raise Exception(f'can not process >{MAX_LEN} words')
+        17
+        18        70        545.0      7.8      0.0      x = np.zeros((len(words), MAX_LEN), np.int32)  # 0: <PAD>
+        19       680        989.0      1.5      0.0      for i, w in enumerate(words):
+        20      3840       5665.0      1.5      0.0          for j, g in enumerate((w + 'E')[:MAX_LEN]):
+        21      3230       5859.0      1.8      0.0              x[i][j] = GRAPHEME_TO_INDEX.get(g, 2)  # 2: <UNK>
+        22
+        23                                               # Auto-regressive inference
+        24        70        233.0      3.3      0.0      preds = np.zeros((len(x), MAX_LEN), np.int32)
+        25      1470       2674.0      1.8      0.0      for j in range(MAX_LEN):
+        26      1400   12597953.0   8998.5     99.5          _preds = SESSION.run(GRAPH.preds, {GRAPH.x: x, GRAPH.y: preds}
+    )
+        27      1400      15989.0     11.4      0.1          preds[:, j] = _preds[:, j]
+        28
+        29                                               # convert to string
+        30        70        108.0      1.5      0.0      phonemes = []
+        31       680       1104.0      1.6      0.0      for pred in preds:
+        32       610      25127.0     41.2      0.2          p = [INDEX_TO_PHONEME[idx] for idx in pred]
+        33       610       1044.0      1.7      0.0          if '<EOS>' in p:
+        34       610       1395.0      2.3      0.0              p = p[:p.index('<EOS>')]
+        35
+        36       610        901.0      1.5      0.0          phonemes.append(p)
+        37
+        38        70         82.0      1.2      0.0      return phonemes
+
+Or, you know, maybe not. A bit of low-hanging fruit in the unnecessary
+``_preds`` assignment, but overall there's very little to do here, the
+Tensorflow operations take such a vast majority of the time spent, that
+everything else is completely eclipsed.
+
+Either way, this is a pretty nice place to be. Our final results definitely
+show some great progress having been made.
+
+.. image:: results/final.png
+
+Final Thoughts
+^^^^^^^^^^^^^^
+
+So how would we eke out even more power here, if we want to go absolutely
+crazy?
+
+- GPU decoding, of course. Not just for the speedup, but also for the batching:
+  on a GPU, we'd be able to run multiple inference tasks at once, and do all
+  our CPU-bound work in the meantime.
+- Model-modifying changes. Things like quanitizing our data down to a smaller
+  byte size or playing with alternate model architectures which aren't quite as
+  heavy-weight.
+- Dump Python. Python's Tensorflow implementation is decent, but switching over
+  to, say, C++'s Tensorflow Serving architecture could be a whole bunch faster.
+  I'm not 100% sold on the idea of their standard approach of building a
+  client/server architecture and interacting via gRPC, but I'm sure the runtime
+  is faster.
+- Take a look at the Tensorflow internals. There's no way they've implemented
+  every possible speedup, there's gotta be improvements which can be made.
+
 .. _g2p_en: https://github.com/Kyubyong/g2p/tree/7caf9d695b178c83f9c3d3e16c3f0a4f4d4d03a2
 .. _Gemfury: https://manage.fury.io/dashboard/thekevjames
 .. _Graph Transform tool: https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/graph_transforms/README.md
+.. _line_profiler: https://github.com/rkern/line_profiler
 .. _py-spy: https://github.com/benfred/py-spy
 .. _Pyflame: https://github.com/uber/pyflame
 .. _stalled: https://github.com/uber/pyflame/pull/153#issuecomment-483496650

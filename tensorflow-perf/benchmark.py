@@ -4,7 +4,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 
-CASE_NAME = 'OptimizedModel'
+CASE_NAME = 'final'
 CASES = [
     'aardvark',
     'tasty applesauce',
