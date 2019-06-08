@@ -4,7 +4,7 @@ import tensorflow as tf
 
 
 MODEL_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                          'model', 'saved', 'frozen_model.pb')
+                          'model', 'saved', 'optimized_model.pb')
 
 
 g = tf.Graph()

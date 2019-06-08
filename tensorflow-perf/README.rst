@@ -262,8 +262,69 @@ This brings us to a speedup of 6x -- technically a bit more than we had before,
 but nothing to write home about. Hopefully, all the biggest improvements will
 come in the next step.
 
+Model Optimization
+^^^^^^^^^^^^^^^^^^
+So far we've done a whole lot of busy work to convert from checkpointed models
+to a frozen model. Now, not to say its been entirely useless: we got to trim
+out a bunch of code that's now only necessary for training, we cut our model
+size down from 4.8MB to 1.5MB, and we learned the value of friendship in the
+process.
+
+But the real point of doing this this migration is so that we can make use of
+the `Graph Transform tool`_. Let's apply a bunch of standard optimization
+transforms and see if they help. Specifically, we're going to call a bunch of
+operations that mostly do exactly what they say they do:
+
+- ``fold_batch_norms`` and ``fold_old_batch_norms``: merge batch normalization
+  multiplications with any multiplications from the previous layer. There are
+  two implementations of batch normalization in Tensorflow, so we need to
+  specify both.
+- ``fold_constants``
+- ``merge_duplicate_nodes``
+- ``remove_nodes(op=Identity)``: strip identity operations (eg. noops) from the
+  model. Note that this operation will break your model if you use control flow
+  operations (as we do), so I won't be applying it.
+- ``remove_nodes(op=CheckNumerics)``: this one isn't always safe to remove; it
+  is meant to catch NaNs and Infs getting passed in. In our case, we know our
+  inputs must already be non-negative integers (and pretty darn small ones at
+  that), so we're good to remove these.
+- ``strip_unused_nodes``
+
+These transformations will get applied in the order we specify, so its
+important to eg. remove unused nodes before folding constants, since the
+removal of unused nodes may make the constant folding catch more cases.
+
+.. code-block:: python
+
+    >>> import tensorflow as tf
+    >>> from tensorflow.tools.graph_transforms import TransformGraph
+    >>> from g2p.session import graph_def
+    >>> optimized_graph_def = TransformGraph(
+    ...     graph_def,
+    ...     ['grapheme', 'phoneme'],
+    ...     ['preds'],
+    ...     [
+    ...         'strip_unused_nodes',
+    ...         'remove_nodes(op=CheckNumerics)',
+    ...         'merge_duplicate_nodes',
+    ...         'fold_constants',
+    ...         'fold_batch_norms',
+    ...         'fold_old_batch_norms',
+    ...     ])
+    >>> tf.train.write_graph(
+    ...     optimized_graph_def,
+    ...     '/src/g2p/model/saved',
+    ...     'optimized_model.pb',
+    ...     as_text=False)
+
+With a speedup of 6.19x, we're making (some) progress, though I'll admit I'd
+been hoping for more.
+
+.. image:: results/optimizedmodel.png
+
 .. _g2p_en: https://github.com/Kyubyong/g2p/tree/7caf9d695b178c83f9c3d3e16c3f0a4f4d4d03a2
 .. _Gemfury: https://manage.fury.io/dashboard/thekevjames
+.. _Graph Transform tool: https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/graph_transforms/README.md
 .. _py-spy: https://github.com/benfred/py-spy
 .. _Pyflame: https://github.com/uber/pyflame
 .. _stalled: https://github.com/uber/pyflame/pull/153#issuecomment-483496650

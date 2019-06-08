@@ -4,7 +4,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 
-CASE_NAME = 'FrozenModel'
+CASE_NAME = 'OptimizedModel'
 CASES = [
     'aardvark',
     'tasty applesauce',
@@ -20,7 +20,7 @@ CASES = [
      'test to the maximum batch size'),
 ]
 
-ITERATIONS = 10
+ITERATIONS = 20
 
 
 with open(f'/results/raw.json', 'r') as f:
@@ -48,11 +48,11 @@ with open(f'/results/raw.json', 'w') as f:
 
 
 for case, values in results.items():
-    if case in {'MKL', 'MKL single thread'}:
+    if case in {'MKL', 'MKL single thread', 'SavedModel'}:
         continue
     plt.plot([v[0] for v in values], [v[1] for v in values], label=case)
 
-plt.ylim(top=400)
+plt.ylim(top=250)
 plt.xlabel('input word count')
 plt.ylabel('time in milliseconds')
 plt.grid(True)
