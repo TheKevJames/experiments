@@ -10,7 +10,9 @@ with g.as_default():
         GRAPH = Graph()
         saver = tf.train.Saver()
 
-config = tf.ConfigProto(device_count={'CPU': 1, 'GPU': 0})
+config = tf.ConfigProto(device_count={'CPU': 1, 'GPU': 0},
+                        intra_op_parallelism_threads=1,
+                        inter_op_parallelism_threads=1)
 
 SESSION = tf.Session(graph=g, config=config)
 saver.restore(SESSION, tf.train.latest_checkpoint(MODEL_PATH))

@@ -21,4 +21,6 @@ RUN pip install /src
 
 COPY . /src
 
+ENV OMP_NUM_THREADS 1
+
 CMD ["bash"]

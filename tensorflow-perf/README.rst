@@ -80,17 +80,46 @@ MKL libs into our test image:
 
 .. code-block:: console
 
-    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+    $ wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+    $ apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
 
-    echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list
+    $ echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list
 
-    apt-get update
-    apt-get install -qy intel-mkl-2019.4-070
+    $ apt-get update
+    $ apt-get install -qy intel-mkl-2019.4-070
 
 Note that this does nothing until we re-compile (again) Tensorflow to use those
 libraries (with ``--config=mkl``).
 
 .. image:: results/mkl.png
+
+Fix Intel MKL Libs
+^^^^^^^^^^^^^^^^^^
+
+Clearly that didn't quite do what we wanted it to. Maybe its a threading issue?
+Tensorflow defaulted to two threads in the first test case, since it attempts
+to determine the number of logical cores when ``intra_op_parallelism_threads``
+and/or ``inter_op_parallelism_threads`` are zero, but maybe that logic doesn't
+work properly under docker.
+
+.. code-block:: python
+
+    config = tf.ConfigProto(..,
+                            intra_op_parallelism_threads=1,
+                            inter_op_parallelism_threads=1)
+
+.. image:: results/mkl_single_thread.png
+
+That's... better... but not quite there. Looks like at least one of the reasons
+MKL seems to be making things slower is due to bad thread logic. How else can
+we fix that up?
+
+.. code-block:: console
+
+    export OMP_NUM_THREADS=1
+
+.. image:: results/mkl_single_thread_opm.png
+
+There we go! A speedup of ~5.9x, that's fantastic progress.
 
 .. _g2p_en: https://github.com/Kyubyong/g2p/tree/7caf9d695b178c83f9c3d3e16c3f0a4f4d4d03a2

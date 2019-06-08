@@ -4,7 +4,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 
-CASE_NAME = 'MKL'
+CASE_NAME = 'MKL single thread OMP'
 CASES = [
     'aardvark',
     'tasty applesauce',
@@ -48,6 +48,8 @@ with open(f'/results/raw.json', 'w') as f:
 
 
 for case, values in results.items():
+    if case in {'MKL', 'MKL single thread'}:
+        continue
     plt.plot([v[0] for v in values], [v[1] for v in values], label=case)
 
 plt.xlabel('input word count')
