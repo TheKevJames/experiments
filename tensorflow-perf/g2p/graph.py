@@ -1,5 +1,3 @@
-import os
-
 import tensorflow as tf
 
 from .params import GRAPHEMES
@@ -7,9 +5,6 @@ from .params import HIDDEN_UNITS
 from .params import LR
 from .params import MAX_LEN
 from .params import PHONEMES
-
-
-MODEL_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'model')
 
 
 class Graph:
@@ -44,7 +39,7 @@ class Graph:
         outputs, _ = tf.nn.dynamic_rnn(cell_with_attention, decoder_inputs,
                                        dtype=tf.float32)  # ( N, T', 16)
         logits = tf.layers.dense(outputs, len(PHONEMES))
-        self.preds = tf.to_int32(tf.argmax(logits, -1))
+        self.preds = tf.to_int32(tf.argmax(logits, -1), name='preds')
 
         # Loss and training
         loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits,

@@ -10,6 +10,8 @@ RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update && \
     apt-get install -qy intel-mkl-2019.4-070
 
+ENV OMP_NUM_THREADS 1
+
 COPY tensorflow /src/tensorflow
 COPY requirements.txt /src/requirements.txt
 RUN pip install --no-cache-dir -r /src/requirements.txt
@@ -20,7 +22,5 @@ COPY setup.py /src
 RUN pip install /src
 
 COPY . /src
-
-ENV OMP_NUM_THREADS 1
 
 CMD ["bash"]
