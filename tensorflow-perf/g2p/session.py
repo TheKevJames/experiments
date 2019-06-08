@@ -2,21 +2,27 @@ import os
 
 import tensorflow as tf
 
-from .graph import Graph
-
 
 MODEL_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                          'model', 'saved')
+                          'model', 'saved', 'frozen_model.pb')
 
 
 g = tf.Graph()
+with tf.gfile.GFile(MODEL_PATH, 'rb') as f:
+    graph_def = tf.GraphDef()
+    graph_def.ParseFromString(f.read())
+
 with g.as_default():
-    with tf.device('/cpu:0'):
-        GRAPH = Graph()
+    tf.import_graph_def(graph_def, name='prefix')
 
 config = tf.ConfigProto(device_count={'CPU': 1, 'GPU': 0},
                         intra_op_parallelism_threads=1,
                         inter_op_parallelism_threads=1)
 
 SESSION = tf.Session(graph=g, config=config)
-tf.saved_model.load(SESSION, ['serve'], MODEL_PATH)
+
+
+class GRAPH:
+    x = g.get_tensor_by_name('prefix/grapheme:0')
+    y = g.get_tensor_by_name('prefix/phoneme:0')
+    preds = g.get_tensor_by_name('prefix/preds:0')

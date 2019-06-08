@@ -4,7 +4,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 
-CASE_NAME = 'SavedModel'
+CASE_NAME = 'FrozenModel'
 CASES = [
     'aardvark',
     'tasty applesauce',
@@ -52,7 +52,7 @@ for case, values in results.items():
         continue
     plt.plot([v[0] for v in values], [v[1] for v in values], label=case)
 
-plt.ylim(top=1000)
+plt.ylim(top=400)
 plt.xlabel('input word count')
 plt.ylabel('time in milliseconds')
 plt.grid(True)

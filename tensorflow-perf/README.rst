@@ -136,7 +136,7 @@ not using a GPU at all, its time to break out a profiler and investigate for
 ourselves.
 
 Profiling
-~~~~~~~~~
+^^^^^^^^^
 
 At this point, it becomes immediately obvious to me that what I've been using
 a script called ``profile.py`` to do benchmarking, not profiling. Fixing that
@@ -160,6 +160,9 @@ thus all development (and support for Py 3.x) is `stalled`_. Let's try out
 That's a whole bunch less useful than I had hoped it would be. Turns out we're
 spending the vast majority of our time within Tensorflow on `this line <https://github.com/tensorflow/tensorflow/blob/6612da89516247503f03ef76e974b51a434fb52e/tensorflow/python/client/session.py#L1405>`_,
 which... well, I can't exactly say I'm surprised.
+
+Model Saving
+^^^^^^^^^^^^
 
 Let's explore out model and see what we can see. My first approach here was to
 look into using ``saved_model_cli show --dir /src/g2p/model/ --all``, but it
@@ -197,6 +200,67 @@ things about how its loaded, but just to double check...
 .. image:: results/savedmodel.png
 
 Yup, no change, that's easily within margin of error.
+
+Model Freezing
+^^^^^^^^^^^^^^
+
+Next step is to "freeze" the model, which will prune unnecessary nodes,
+de-duplicate repeated variables, and generally make things ``const`` wherever
+possible. This in itself has potential to be an optimization:
+
+.. code-block:: python
+
+    >>> import tensorflow as tf
+    >>> from g2p.session import SESSION
+    >>> output_graph_def = tf.graph_util.convert_variables_to_constants(
+    ...     SESSION, SESSION.graph_def, ['preds'])
+    >>> with tf.gfile.GFile('frozen_model.pb', 'wb') as f:
+    ...     f.write(output_graph_def.SerializeToString())
+
+Note that at this point I found out that ``Graph.preds`` had not previously
+been assigned a name and thus could not be exported. TIL: its not the name of
+the variable which is used, but the literal ``.name`` attribute attached to
+that variable. For example, the following class has a variable named ``bar``,
+not one named ``foo``:
+
+.. code-block:: python
+
+    class Graph:
+        def __init__(self):
+            self.foo = tf.placeholder(tf.int32, shape=(None, 42), name='bar')
+
+Anyway, this step gives us a ``frozen_model.pb`` file. Let's switch to loading
+it instead of our ``SavedModel``.
+
+.. code-block:: python
+
+    g = tf.Graph()
+    with tf.gfile.GFile(FROZEN_MODEL_PATH, 'rb') as f:
+        graph_def = tf.GraphDef()
+        graph_def.ParseFromString(f.read())
+
+    with g.as_default():
+        tf.import_graph_def(graph_def, name='prefix')
+
+    SESSION = tf.Session(graph=g)
+
+Note that we no longer need to have the ``Graph`` class at all! The only parts
+of it which we still need for inference are in the call to ``SESSION.run()``,
+but that can be easily solved with a refactor:
+
+.. code-block:: python
+
+    # SESSION.run(GRAPH.preds, {GRAPH.x: x, GRAPH.y: y})
+    GRAPHpreds = g.get_tensor_by_name('prefix/preds:0')
+    GRAPHx = g.get_tensor_by_name('prefix/grapheme:0')
+    GRAPHy = g.get_tensor_by_name('prefix/phoneme:0')
+    SESSION.run(GRAPHpreds, {GRAPHx: x, GRAPHy: y})
+
+.. image:: results/frozenmodel.png
+
+This brings us to a speedup of 6x -- technically a bit more than we had before,
+but nothing to write home about. Hopefully, all the biggest improvements will
+come in the next step.
 
 .. _g2p_en: https://github.com/Kyubyong/g2p/tree/7caf9d695b178c83f9c3d3e16c3f0a4f4d4d03a2
 .. _Gemfury: https://manage.fury.io/dashboard/thekevjames

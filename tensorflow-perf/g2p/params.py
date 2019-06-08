@@ -1,5 +1,3 @@
-HIDDEN_UNITS = 128
-LR = 0.0001
 MAX_LEN = 20
 
 GRAPHEMES = ['P', 'E', 'U'] + list('abcdefghijklmnopqrstuvwxyz')
