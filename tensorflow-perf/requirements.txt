@@ -1,3 +1,4 @@
+# tensorflow==1.13.1
+/src/tensorflow/tensorflow-1.13.1-cp37-cp37m-linux_x86_64.whl
 matplotlib
 numpy==1.16.4
-tensorflow==1.13.1

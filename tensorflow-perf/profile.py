@@ -4,7 +4,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 
-CASE_NAME = 'initial'
+CASE_NAME = 'AVX2 and FMA'
 CASES = [
     'aardvark',
     'tasty applesauce',
@@ -20,7 +20,7 @@ CASES = [
      'test to the maximum batch size'),
 ]
 
-ITERATIONS = 1
+ITERATIONS = 10
 
 
 with open(f'/results/raw.json', 'r') as f:
@@ -37,16 +37,23 @@ for case in CASES:
     time = round(min(times) / float(ITERATIONS) * 1e3, 2)
     results[CASE_NAME].append((len(case.split()), time))
 
+
+speedups = [i[1] / c[1]
+            for i, c in zip(results['initial'], results[CASE_NAME])]
+print(f'Speedups: {[round(x, 2) for x in speedups]}')
+print(f'Speedup (mean): {round(sum(speedups) / len(speedups), 3)}')
+
 with open(f'/results/raw.json', 'w') as f:
-    f.write(json.dumps(results))
+    f.write(json.dumps(results, sort_keys=True, indent=4) + '\n')
 
 
 for case, values in results.items():
     plt.plot([v[0] for v in values], [v[1] for v in values], label=case)
-    plt.xlabel('input word count')
-    plt.ylabel('time in milliseconds')
-    plt.grid(True)
-    plt.legend()
 
-    plt.savefig(f'/results/{CASE_NAME.lower().replace(" ", "_")}.png')
-    plt.close()
+plt.xlabel('input word count')
+plt.ylabel('time in milliseconds')
+plt.grid(True)
+plt.legend()
+
+plt.savefig(f'/results/{CASE_NAME.lower().replace(" ", "_")}.png')
+plt.close()

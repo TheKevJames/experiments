@@ -1,6 +1,6 @@
 import logging
 # Yes, we get it, Tensorflow v2.x is going to refactor everything.
-logging.getLogger('tensorflow').setLevel(logging.ERROR)
+logging.getLogger('tensorflow').disabled = True
 
 from .predict import predict  # noqa
 
