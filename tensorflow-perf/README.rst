@@ -54,7 +54,8 @@ Well, the first one is the easiest: Tensorflow even warns you about this one.
     Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
 
 Let's go ahead and do that; any more advanced instructions that Tensorflow can
-make use of are bound to help us out.
+make use of are bound to help us out. Compiling with ``-march=native -mavx2
+-mfma -O3`` should do the trick!
 
 .. code-block:: console
 
@@ -68,5 +69,28 @@ and modified the ``Dockerfile`` to install from that wheel accordingly.
 The new instructions sets give us a nice speedup of about 1.2x.
 
 .. image:: results/avx2_and_fma.png
+
+Use Intel MKL Libs
+^^^^^^^^^^^^^^^^^^
+
+The Intel MKL libraries are, in their own words "the fastest and most-used
+math libraries for Intel-based systems". That's bold words! Let's take a look.
+Using the instructions found `here <https://software.intel.com/en-us/articles/installing-intel-free-libs-and-python-apt-repo>`_, we can install the latest
+MKL libs into our test image:
+
+.. code-block:: console
+
+    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
+
+    echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list
+
+    apt-get update
+    apt-get install -qy intel-mkl-2019.4-070
+
+Note that this does nothing until we re-compile (again) Tensorflow to use those
+libraries (with ``--config=mkl``).
+
+.. image:: results/mkl.png
 
 .. _g2p_en: https://github.com/Kyubyong/g2p/tree/7caf9d695b178c83f9c3d3e16c3f0a4f4d4d03a2

@@ -4,7 +4,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 
-CASE_NAME = 'AVX2 and FMA'
+CASE_NAME = 'MKL'
 CASES = [
     'aardvark',
     'tasty applesauce',

@@ -2,6 +2,16 @@ FROM python:3.7.3-stretch
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update && \
+    apt-get install -qy apt-transport-https && \
+    wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB && \
+    echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list && \
+    apt-get update && \
+    apt-get install -qy intel-mkl-2019.4-070
+
+RUN DEBIAN_FRONTEND=noninteractive \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         build-essential \
         curl \
@@ -58,7 +68,7 @@ ENV TF_NEED_GCP 0
 ENV TF_NEED_HDFS 0
 ENV TF_NEED_KAFKA 0
 ENV TF_SET_ANDROID_WORKSPACE 0
-ENV TF_DOWNLOAD_CLANG 1
+ENV TF_DOWNLOAD_CLANG 0
 
 ENV TF_NEED_GDR 0
 ENV TF_NEED_JEMALLOC 1
@@ -72,9 +82,9 @@ ENV TF_NEED_CUDA 0
 
 ENV TF_NEED_MPI 0
 
-ENV CC_OPT_FLAGS "-march=native -mavx2 -mfma"
+ENV CC_OPT_FLAGS "-march=native -mavx2 -mfma -O3"
 
 WORKDIR /tensorflow
 RUN ./configure && \
-    bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package && \
+    bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package && \
     ./bazel-bin/tensorflow/tools/pip_package/build_pip_package /pkg
