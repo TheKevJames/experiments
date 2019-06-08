@@ -17,10 +17,27 @@ Usage
 .. code-block:: console
 
     $ docker build -t tfopt .
-    $ docker run --rm -it --cpus=1 \
-          -v$(pwd):/src tfopt python
+    $ docker run --rm -it tfopt python
     >>> import g2p
     >>> g2p.predict('aardvark')
     [['AA1', 'R', 'D', 'V', 'AA2', 'R', 'K']]
+
+Profiling
+---------
+
+.. code-block:: console
+
+    $ docker build -t tfopt .
+    $ docker run --rm -it \
+          --cpus=1 --memory=4G \
+          -v $(pwd)/results:/results \
+          tfopt python /src/profile.py
+
+Optimizations
+-------------
+
+First off, let's get our initial values benchmarked.
+
+.. image:: results/initial.png
 
 .. _g2p_en: https://github.com/Kyubyong/g2p/tree/7caf9d695b178c83f9c3d3e16c3f0a4f4d4d03a2
