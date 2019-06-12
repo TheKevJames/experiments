@@ -1,6 +1,8 @@
 Tensorflow Optimization
 =======================
 
+    Note: this experiment has been cleaned up and `posted on my blog <https://thekev.in/blog/2019-06-08-tensorflow-model-optimization/>`_.
+
 This represents an experiment in eking out the absolute most performance from a
 Tensorflow model as I possibly can get without modifying the model itself or
 running on more than a single CPU.
