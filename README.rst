@@ -6,6 +6,7 @@ This repository is a collection of various one-off experiments.
 - `Docker Image Size Tests`_
 - `Guild Wars 2 Scripts`_
 - `Jaro-Winkler Speed Comparisons`_
+- `HTTP Auth with Google KMS`_
 - `League of Legends Scripts`_
 - `Mini String Manipulations`_
 - `Python Datetimes`_ (see associated
@@ -16,6 +17,7 @@ This repository is a collection of various one-off experiments.
 
 .. _Docker Image Size Tests: https://github.com/TheKevJames/experiments/tree/master/docker-size
 .. _Guild Wars 2 Scripts: https://github.com/TheKevJames/experiments/tree/master/gw2
+.. _HTTP Auth with Google KMS: https://github.com/TheKevJames/experiments/tree/master/kms-auth
 .. _Jaro-Winkler Speed Comparisons: https://github.com/TheKevJames/experiments/tree/master/jaro-winkler-comparisons
 .. _League of Legends Scripts: https://github.com/TheKevJames/experiments/tree/master/league
 .. _Mini String Manipulations: https://github.com/TheKevJames/experiments/tree/master/string-manips
