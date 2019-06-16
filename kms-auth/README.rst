@@ -1,6 +1,8 @@
 HTTP Auth with Google KMS
 =========================
 
+    Note: this experiment has been cleaned up and `posted on my blog <https://thekev.in/blog/2019-06-15-http-auth-with-google-kms/>`_.
+
 Staying entirely within the Google ecosystem for eg. server-to-server
 communication is very adequately handled by the builtin Google primitives such
 as verification of service accounts (or, in some cases, even some very cool

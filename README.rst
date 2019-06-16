@@ -6,7 +6,8 @@ This repository is a collection of various one-off experiments.
 - `Docker Image Size Tests`_
 - `Guild Wars 2 Scripts`_
 - `Jaro-Winkler Speed Comparisons`_
-- `HTTP Auth with Google KMS`_
+- `HTTP Auth with Google KMS`_ (see associated
+  `blog post <https://thekev.in/blog/2019-06-15-http-auth-with-google-kms/>`__)
 - `League of Legends Scripts`_
 - `Mini String Manipulations`_
 - `Python Datetimes`_ (see associated
