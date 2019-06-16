@@ -73,7 +73,7 @@ resource "google_kms_crypto_key" "routes-admin" {
   rotation_period = "86400s"
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_binding" "key-standard" {
   count = "${len(local.routes_standard)}"
 
   crypto_key_id = "${google_kms_crypto_key.routes-standard[count.index].self_link}"
@@ -93,10 +93,10 @@ resource "google_kms_crypto_key_iam_binding" "crypto_key" {
   # Terraform primitives to solve this:
   #   members = concat([
   #     "group:standard-access-only@company.com",
-  #   ], ${google_kms_crypto_key_iam_binding.crypto_key[count.index].members})
+  #   ], ${google_kms_crypto_key_iam_binding.key-admin[count.index].members})
 }
 
-resource "google_kms_crypto_key_iam_binding" "crypto_key" {
+resource "google_kms_crypto_key_iam_binding" "key-admin" {
   count = "${len(local.routes_admin)}"
 
   crypto_key_id = "${google_kms_crypto_key.routes-admin[count.index].self_link}"
