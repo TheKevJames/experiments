@@ -4,6 +4,7 @@ Various Experiments
 This repository is a collection of various one-off experiments.
 
 - `Docker Image Size Tests`_
+- `Dockerfiles as Bootable VMs in GCP`_
 - `Guild Wars 2 Scripts`_
 - `Jaro-Winkler Speed Comparisons`_
 - `HTTP Auth with Google KMS`_ (see associated
@@ -17,6 +18,7 @@ This repository is a collection of various one-off experiments.
   `blog post <https://thekev.in/blog/2019-06-08-tensorflow-model-optimization/>`__)
 
 .. _Docker Image Size Tests: https://github.com/TheKevJames/experiments/tree/master/docker-size
+.. _Dockerfiles as Bootable VMs in GCP: https://github.com/TheKevJames/experiments/tree/master/gcp-image-from-docker
 .. _Guild Wars 2 Scripts: https://github.com/TheKevJames/experiments/tree/master/gw2
 .. _HTTP Auth with Google KMS: https://github.com/TheKevJames/experiments/tree/master/kms-auth
 .. _Jaro-Winkler Speed Comparisons: https://github.com/TheKevJames/experiments/tree/master/jaro-winkler-comparisons

@@ -1,5 +1,5 @@
-Dockerfiles as Bootable VMs
-===========================
+Dockerfiles as Bootable VMs in GCP
+==================================
 
 An experiment in transforming a Dockerfile into a bootable and fully
 GCP-compatible custom VM image which can be used to spawn GCE instances with
