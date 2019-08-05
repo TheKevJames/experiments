@@ -1,0 +1,6 @@
+label: dos
+label-id: 0x5d8b75fc
+device: disk.img
+unit: sectors
+
+disk.img1 : start=2048, size=4192248, type=83, bootable

@@ -1,0 +1,13 @@
+# https://cloud.google.com/compute/docs/import/configuring-imported-images
+Host *
+Protocol 2
+ForwardAgent no
+ForwardX11 no
+HostbasedAuthentication no
+StrictHostKeyChecking no
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr,arcfour256,arcfour128,aes128-cbc,3des-cbc
+Tunnel no
+
+# Google Compute Engine times out connections after 10 minutes of inactivity.
+# Keep alive ssh connections by sending a packet every 7 minutes.
+ServerAliveInterval 420

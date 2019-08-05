@@ -1,0 +1,14 @@
+# See https://github.com/andsens/bootstrap-vz/blob/master/LICENSE for
+# legal notices and disclaimers.
+
+[Unit]
+Description=Expand the root partition and filesystem on boot
+After=local-fs.target
+Wants=local-fs.target
+
+[Service]
+ExecStart=/usr/local/sbin/expand-root /dev/sda 1 ext3
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
