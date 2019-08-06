@@ -4,7 +4,8 @@ Various Experiments
 This repository is a collection of various one-off experiments.
 
 - `Docker Image Size Tests`_
-- `Dockerfiles as Bootable VMs in GCP`_
+- `Dockerfiles as Bootable VMs in GCP`_ (see associated
+  `blog post <https://thekev.in/blog/2019-08-05-dockerfile-bootable-vm/>`__)
 - `Guild Wars 2 Scripts`_
 - `Jaro-Winkler Speed Comparisons`_
 - `HTTP Auth with Google KMS`_ (see associated

@@ -1,6 +1,8 @@
 Dockerfiles as Bootable VMs in GCP
 ==================================
 
+    Note: this experiment has been cleaned up and `posted on my blog <https://thekev.in/blog/2019-08-05-dockerfile-bootable-vm/>`_.
+
 An experiment in transforming a Dockerfile into a bootable and fully
 GCP-compatible custom VM image which can be used to spawn GCE instances with
 full support for any and all standard GCE operations.
