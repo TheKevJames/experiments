@@ -1,10 +1,10 @@
-FROM python:3.6.2 as base
+FROM python:3.7.4 as base
 
 COPY requirements.txt /app/requirements.txt
 RUN python -m pip install -r /app/requirements.txt
 
 
-FROM python:3.6.2-alpine
+FROM python:3.7.4-alpine
 COPY --from=base /root/.cache /root/.cache
 
 COPY requirements.txt /app/requirements.txt

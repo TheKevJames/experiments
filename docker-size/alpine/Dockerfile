@@ -1,4 +1,4 @@
-FROM python:3.6.2-alpine
+FROM python:3.7.4-alpine
 
 RUN apk add --no-cache build-base gcc && \
     rm -rf /var/cache/apk/*
