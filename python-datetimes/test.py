@@ -102,7 +102,8 @@ def test(my_name, my_value):
     try:
         x = TABLE[my_name]['naive_datetime_local'](my_value)
         y = TABLE['naive_datetime_local'][my_name](x)
-        assert x == NAIVE_DATETIME_LOCAL, '{} != {}'.format(x, NAIVE_DATETIME_LOCAL)
+        assert x == NAIVE_DATETIME_LOCAL, '{} != {}'.format(
+            x, NAIVE_DATETIME_LOCAL)
         assert y == my_value, '{} != {}'.format(y, my_value)
     except KeyError:
         print('unsupported: {} -> {}'.format(my_name, 'naive_datetime_local'))
@@ -110,7 +111,8 @@ def test(my_name, my_value):
     try:
         x = TABLE[my_name]['naive_datetime_utc'](my_value)
         y = TABLE['naive_datetime_utc'][my_name](x)
-        assert x == NAIVE_DATETIME_UTC, '{} != {}'.format(x, NAIVE_DATETIME_UTC)
+        assert x == NAIVE_DATETIME_UTC, '{} != {}'.format(
+            x, NAIVE_DATETIME_UTC)
         assert y == my_value, '{} != {}'.format(y, my_value)
     except KeyError:
         print('unsupported: {} -> {}'.format(my_name, 'naive_datetime_utc'))
@@ -163,10 +165,12 @@ def print_table():
             return '-'
         return '`{}`'.format(code)
 
-    print('| Row -> Col | {} |'.format(' | '.join(display_name[k] for k in ordered)))
+    print(
+        '| Row -> Col | {} |'.format(' | '.join(display_name[k] for k in ordered)))
     print('|----|{}|'.format('|'.join('-----' for _ in ordered)))
     for lhs in ordered:
-        print('| {} | {} |'.format(display_name[lhs], ' | '.join(display_code(lhs, k) for k in ordered)))
+        print('| {} | {} |'.format(display_name[lhs], ' | '.join(
+            display_code(lhs, k) for k in ordered)))
 
 
 test_all()

@@ -3,8 +3,8 @@ import json
 import time
 
 import aiohttp
-from gcloud.aio.kms import KMS
 from gcloud.aio.kms import encode
+from gcloud.aio.kms import KMS
 
 
 # Our client code is pretty straightforward -- really we just need to create

@@ -7,6 +7,6 @@ OUTPUT = (b'\xabS\n\x13\xe4Y\x14\x98+y\xf9\xb7\xe3\xfb\xa9\x94\xcf\xd1\xf3'
 
 
 if __name__ == '__main__':
-    hash = SHA256.new()
-    hash.update(INPUT)
-    print(hash.digest() == OUTPUT)
+    hash_ = SHA256.new()
+    hash_.update(INPUT)
+    print(hash_.digest() == OUTPUT)

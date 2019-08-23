@@ -5,8 +5,8 @@ import urllib.request
 
 import aiohttp
 import sanic
-from gcloud.aio.kms import KMS
 from gcloud.aio.kms import decode
+from gcloud.aio.kms import KMS
 from sanic.exceptions import Unauthorized
 from sanic.request import Request
 from sanic.response import HTTPResponse
