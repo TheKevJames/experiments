@@ -1,4 +1,4 @@
-FROM python:3.6.2-alpine as base
+FROM python:3.6.9-alpine as base
 
 RUN apk add --no-cache build-base gcc && \
     rm -rf /var/cache/apk/*
@@ -7,7 +7,7 @@ COPY requirements.txt /app/requirements.txt
 RUN python -m pip install -r /app/requirements.txt
 
 
-FROM python:3.6.2-alpine
+FROM python:3.6.9-alpine
 COPY --from=base /root/.cache /root/.cache
 
 COPY requirements.txt /app/requirements.txt
