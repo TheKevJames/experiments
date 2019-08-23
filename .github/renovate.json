@@ -4,7 +4,7 @@
     "paths": [".circleci/*", ".pre-commit-config.yaml"],
     "enabled": true
   }, {
-    "paths": ["docker-size/*", "kms-auth/*", "tensorflow-perf/**/*"],
+    "paths": ["docker-size/**/*", "kms-auth/*", "tensorflow-perf/**/*"],
     "enabled": false
   }]
 }
