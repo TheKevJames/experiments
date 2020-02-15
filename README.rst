@@ -6,10 +6,11 @@ This repository is a collection of various one-off experiments.
 - `Docker Image Size Tests`_
 - `Dockerfiles as Bootable VMs in GCP`_ (see associated
   `blog post <https://thekev.in/blog/2019-08-05-dockerfile-bootable-vm/>`__)
+- `Google Pub/Sub Performance Testing`_
 - `Guild Wars 2 Scripts`_
-- `Jaro-Winkler Speed Comparisons`_
 - `HTTP Auth with Google KMS`_ (see associated
   `blog post <https://thekev.in/blog/2019-06-15-http-auth-with-google-kms/>`__)
+- `Jaro-Winkler Speed Comparisons`_
 - `League of Legends Scripts`_
 - `Mini String Manipulations`_
 - `Python Datetimes`_ (see associated
@@ -20,6 +21,7 @@ This repository is a collection of various one-off experiments.
 
 .. _Docker Image Size Tests: https://github.com/TheKevJames/experiments/tree/master/docker-size
 .. _Dockerfiles as Bootable VMs in GCP: https://github.com/TheKevJames/experiments/tree/master/gcp-image-from-docker
+.. _Google Pub/Sub Performance Testing: https://github.com/TheKevJames/experiments/tree/master/google-pubsub-perf
 .. _Guild Wars 2 Scripts: https://github.com/TheKevJames/experiments/tree/master/gw2
 .. _HTTP Auth with Google KMS: https://github.com/TheKevJames/experiments/tree/master/kms-auth
 .. _Jaro-Winkler Speed Comparisons: https://github.com/TheKevJames/experiments/tree/master/jaro-winkler-comparisons
