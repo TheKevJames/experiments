@@ -3,13 +3,14 @@
 Google Pub/Sub Performance Test Harness
 
 Usage:
-  run.py [--rate=<rate>] [--duration=<duration>]
+  run.py [--rate=<rate>] [--duration=<duration>] [--style=<style>]
   run.py -h | --help
 
 Options:
-  --duration=<duration>     duration of test in seconds [default: 10]
-  --rate=<rate>             per second publish rate [default: 1]
-  -h --help                 show this screen
+  --duration=<duration>    duration of test in seconds [default: 10]
+  --rate=<rate>            per second publish rate [default: 1]
+  --style=<style>          pull style (async | sync) [default: async]
+  -h --help                show this screen
 """
 import concurrent.futures
 import datetime
@@ -47,6 +48,31 @@ def setup():
         pass
 
 
+def print_stats(local: list, server: list, *, duration: int, rate: int):
+    print(f'Total Items: {rate}x{duration} => {len(local)}')
+    if len(local) != duration * rate:
+        print('    \033[91m> Mismatched Results!\033[0m')
+    print()
+
+    print(f'Mean from Process: {statistics.mean(local):.4f}')
+    arr = numpy.array(local)
+    print(f'50th from Process: {numpy.percentile(arr, 50):.4f}')
+    print(f'75th from Process: {numpy.percentile(arr, 75):.4f}')
+    print(f'85th from Process: {numpy.percentile(arr, 85):.4f}')
+    print(f'95th from Process: {numpy.percentile(arr, 95):.4f}')
+    print(f'99th from Process: {numpy.percentile(arr, 99):.4f}')
+
+    print()
+
+    print(f'Mean from Server: {statistics.mean(server):.4f}')
+    arr = numpy.array(server)
+    print(f'50th from Server: {numpy.percentile(arr, 50):.4f}')
+    print(f'75th from Server: {numpy.percentile(arr, 75):.4f}')
+    print(f'85th from Server: {numpy.percentile(arr, 85):.4f}')
+    print(f'95th from Server: {numpy.percentile(arr, 95):.4f}')
+    print(f'99th from Server: {numpy.percentile(arr, 99):.4f}')
+
+
 def publish(*, duration: int, rate: int):
     publisher = pubsub.PublisherClient(
         batch_settings=pubsub.types.BatchSettings(max_messages=rate))
@@ -68,25 +94,36 @@ def publish(*, duration: int, rate: int):
     publisher.stop()
 
 
-def subscribe_async(*, duration: int, rate: int):
+def callback(local, server, message):
+    now = time.time()
+
+    local_latency = round(now - float(message.attributes['timestamp']), 4)
+    local.append(local_latency)
+
+    try:
+        # async
+        server_latency = round(now - message.publish_time.timestamp(), 4)
+        server.append(server_latency)
+    except AttributeError:
+        # sync, ie. protobufs
+        epoch = (message.publish_time.seconds
+                 + message.publish_time.nanos / (10 ** 9))
+        server_latency = round(now - epoch, 4)
+        server.append(server_latency)
+
+    try:
+        # async
+        message.ack()
+    except AttributeError:
+        # sync, ie. protobufs
+        pass
+
+
+def subscribe_async(latencies_local, latencies_server, *, count: int,
+                    duration: int, rate: int):
     subscriber = pubsub.SubscriberClient()
     topic = f'projects/{PROJECT}/topics/{TOPIC}'
     subscription = f'projects/{PROJECT}/subscriptions/{TOPIC}-0'
-
-    manager = multiprocessing.Manager()
-    latencies_local = manager.list()
-    latencies_server = manager.list()
-
-    def callback(local, server, message):
-        now = time.time()
-
-        local_latency = round(now - float(message.attributes['timestamp']), 4)
-        local.append(local_latency)
-
-        server_latency = round(now - message.publish_time.timestamp(), 4)
-        server.append(server_latency)
-
-        message.ack()
 
     cb = functools.partial(callback, latencies_local, latencies_server)
     future = subscriber.subscribe(subscription, cb)
@@ -95,41 +132,55 @@ def subscribe_async(*, duration: int, rate: int):
     except concurrent.futures.TimeoutError:
         pass
 
-    print(f'Total Items: {rate}x{duration} => {len(latencies_local)}')
-    if len(latencies_local) != duration * rate:
-        print('    \033[91m> Mismatched Results!\033[0m')
-    print()
 
-    print(f'Mean from Process: {statistics.mean(latencies_local):.4f}')
-    arr = numpy.array(latencies_local)
-    print(f'50th from Process: {numpy.percentile(arr, 50):.4f}')
-    print(f'75th from Process: {numpy.percentile(arr, 75):.4f}')
-    print(f'85th from Process: {numpy.percentile(arr, 85):.4f}')
-    print(f'95th from Process: {numpy.percentile(arr, 95):.4f}')
-    print(f'99th from Process: {numpy.percentile(arr, 99):.4f}')
+def subscribe_sync(latencies_local, latencies_server, *, count: int,
+                   duration: int, rate: int):
+    subscriber = pubsub.SubscriberClient()
+    subscription = f'projects/{PROJECT}/subscriptions/{TOPIC}-0'
 
-    print()
+    for _ in range(duration * rate // count):
+        # theoretically, timeout should only apply on the first message, eg.
+        # since we are still spinning up `fn_count` processes...
+        response = subscriber.pull(subscription, max_messages=1, timeout=100)
+        for msg in response.received_messages:
+            callback(latencies_local, latencies_server, msg.message)
 
-    print(f'Mean from Server: {statistics.mean(latencies_server):.4f}')
-    arr = numpy.array(latencies_server)
-    print(f'50th from Server: {numpy.percentile(arr, 50):.4f}')
-    print(f'75th from Server: {numpy.percentile(arr, 75):.4f}')
-    print(f'85th from Server: {numpy.percentile(arr, 85):.4f}')
-    print(f'95th from Server: {numpy.percentile(arr, 95):.4f}')
-    print(f'99th from Server: {numpy.percentile(arr, 99):.4f}')
+        ack_ids = [msg.ack_id for msg in response.received_messages]
+        subscriber.acknowledge(subscription, ack_ids)
 
 
 def main(args: dict):
-    # setup()
+    setup()
 
     duration = int(args['--duration'])
     rate = int(args['--rate'])
+    (fn, fn_count) = {
+        'async': (subscribe_async, 1),
+        'sync': (subscribe_sync, -(-rate // 10)),
+    }[args['--style']]
 
-    p = multiprocessing.Process(target=subscribe_async,
-                                kwargs={'duration': duration, 'rate': rate})
-    p.start()
+    # lest I have to do more complicated math
+    assert not duration * rate % fn_count, 'Invalid subscriber thread count'
+
+    manager = multiprocessing.Manager()
+    latencies_local = manager.list()
+    latencies_server = manager.list()
+
+    ps = []
+    for _ in range(fn_count):
+        p = multiprocessing.Process(target=fn,
+                                    args=(latencies_local, latencies_server),
+                                    kwargs={'count': fn_count,
+                                            'duration': duration,
+                                            'rate': rate})
+        p.start()
+        ps.append(p)
+
     publish(duration=duration, rate=rate)
-    p.join()
+
+    _ = [p.join() for p in ps]
+    print_stats(latencies_local, latencies_server, duration=duration,
+                rate=rate)
 
 
 if __name__ == '__main__':

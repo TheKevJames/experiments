@@ -37,10 +37,10 @@ There are a few things that I think the below `Results`_ point to:
   is worth keeping in mind, especially when designing systems with heavy
   levels of volume surges.
 
-    * Corollary: note that my results don't show all that much in the way of
-      added latency at low throughputs. There's a bit, but much less than I
-      was expecting given how frequently I'd heard that this was an issue for
-      Pub/Sub.
+    Corollary: note that my results don't show all that much in the way of
+    added latency at low throughputs. There's a bit, but much less than I was
+    expecting given how frequently I'd heard that this was an issue for
+    Pub/Sub.
 
 * The 99th percentile in the below results was often not that great -- but I
   do want to mention that (**purely subjectively**) it felt like the 99th was
@@ -48,6 +48,16 @@ There are a few things that I think the below `Results`_ point to:
   than pausing a bit between them; to me, that implies there's a definite
   corrolation between the 99th percentile and the spin up time I already
   mentioned above. Results may be better than they appear?
+
+* Using a synchronous subscription strategy was... hard. By the time you start
+  enough processes to have the throughput necessary to make this a valid test
+  case, the additional overhead kept it below the mark. I *think* the data is
+  pointing to no real change in latency, assuming you have enough workers to
+  keep up with your ingestion rate, but it would cost a whole bunch to
+  (dis?)prove that hypothesis. The overall throughput seems to be somewhere in
+  the neighbourhood of a hundredth (worse, maybe?) of the async method --
+  which pretty much means you'd be better served using async processors with a
+  low flow control value.
 
 And, less relevantly:
 
@@ -92,16 +102,11 @@ Given a productionized publisher should be expected to tweak its batch
 settings for its expected use-case, its probably not unreasonable to assume
 real-world results will be somewhere between these two sets of stats.
 
-TODO: provide comparison implementations for:
-
-* `Synchronous Subscriptions <https://cloud.google.com/pubsub/docs/pull#synchronous_pull>`_
-* `Streaming Pull <https://cloud.google.com/pubsub/docs/pull#streamingpull>`_
-
 Async Subscriber
 ^^^^^^^^^^^^^^^^
 
 The "Async Subscriber" is
-`this one <https://cloud.google.com/pubsub/docs/pull#asynchronous-pull>`_,
+`this one <https://cloud.google.com/pubsub/docs/pull#asynchronous-pull>`__,
 ie. the one that calls ``pubsub_v1.SubscriberClient().subscribe()``.
 
 Rate: 10/s
@@ -346,6 +351,225 @@ Rate: 1000/s
     85th from Server: 0.3167
     95th from Server: 0.4540
     99th from Server: 2.1082
+
+Sync Subscriber
+^^^^^^^^^^^^^^^
+
+The "Sync Subscriber" is
+`this one <https://cloud.google.com/pubsub/docs/pull#synchronous-pull>`__,
+ie. the one that calls ``pubsub_v1.SubscriberClient().pull()``.
+
+Rate: 10/s
+~~~~~~~~~~
+
+::
+
+    Total Items: 10x10 => 100
+
+    Mean from Process: 4.5895
+    50th from Process: 4.3818
+    75th from Process: 4.8678
+    85th from Process: 6.6367
+    95th from Process: 7.0220
+    99th from Process: 7.2653
+
+    Mean from Server: 3.3649
+    50th from Server: 3.7212
+    75th from Server: 4.1823
+    85th from Server: 4.3851
+    95th from Server: 4.5792
+    99th from Server: 4.7379
+
+::
+
+    Total Items: 10x10 => 100
+
+    Mean from Process: 8.3597
+    50th from Process: 8.2513
+    75th from Process: 9.4288
+    85th from Process: 9.7617
+    95th from Process: 10.0671
+    99th from Process: 10.2071
+
+    Mean from Server: 7.6889
+    50th from Server: 7.6950
+    75th from Server: 8.2705
+    85th from Server: 8.4776
+    95th from Server: 8.7879
+    99th from Server: 8.9883
+
+::
+
+    Total Items: 10x60 => 600
+
+    Mean from Process: 0.8003
+    50th from Process: 0.3821
+    75th from Process: 0.6029
+    85th from Process: 1.5077
+    95th from Process: 3.2093
+    99th from Process: 6.4622
+
+    Mean from Server: 0.6571
+    50th from Server: 0.3692
+    75th from Server: 0.5684
+    85th from Server: 1.3247
+    95th from Server: 2.6783
+    99th from Server: 3.2287
+
+::
+
+    Total Items: 10x60 => 600
+
+    Mean from Process: 0.5417
+    50th from Process: 0.3246
+    75th from Process: 0.4894
+    85th from Process: 0.5944
+    95th from Process: 2.1275
+    99th from Process: 4.6965
+
+    Mean from Server: 0.4210
+    50th from Server: 0.3071
+    75th from Server: 0.4709
+    85th from Server: 0.5479
+    95th from Server: 1.6345
+    99th from Server: 2.1946
+
+::
+
+    Total Items: 10x300 => 3000
+
+    Mean from Process: 0.4242
+    50th from Process: 0.3086
+    75th from Process: 0.4664
+    85th from Process: 0.5417
+    95th from Process: 1.3756
+    99th from Process: 3.2028
+
+    Mean from Server: 0.3766
+    50th from Server: 0.2947
+    75th from Server: 0.4540
+    85th from Server: 0.5162
+    95th from Server: 1.2125
+    99th from Server: 2.5932
+
+Rate: 100/s
+~~~~~~~~~~~
+
+::
+
+    Total Items: 100x10 => 1000
+
+    Mean from Process: 4.5117
+    50th from Process: 3.2961
+    75th from Process: 5.2452
+    85th from Process: 5.8247
+    95th from Process: 18.5745
+    99th from Process: 18.8548
+
+    Mean from Server: 3.7358
+    50th from Server: 2.9657
+    75th from Server: 3.4446
+    85th from Server: 3.6759
+    95th from Server: 18.5594
+    99th from Server: 18.8423
+
+::
+
+    Total Items: 100x100 => 10000
+
+    Mean from Process: 2.0861
+    50th from Process: 0.5867
+    75th from Process: 2.9041
+    85th from Process: 5.1725
+    95th from Process: 8.6458
+    99th from Process: 12.3973
+
+    Mean from Server: 1.6627
+    50th from Server: 0.5586
+    75th from Server: 2.3707
+    85th from Server: 4.2897
+    95th from Server: 6.1649
+    99th from Server: 6.9276
+
+::
+
+    Total Items: 100x100 => 10000
+
+    Mean from Process: 0.9016
+    50th from Process: 0.5007
+    75th from Process: 0.7477
+    85th from Process: 1.6261
+    95th from Process: 3.5258
+    99th from Process: 6.6940
+
+    Mean from Server: 0.7515
+    50th from Server: 0.4788
+    75th from Server: 0.7181
+    85th from Server: 1.3203
+    95th from Server: 3.0155
+    99th from Server: 3.8479
+
+::
+
+    Total Items: 100x300 => 30000
+
+    Mean from Process: 0.5180
+    50th from Process: 0.3907
+    75th from Process: 0.5729
+    85th from Process: 0.6458
+    95th from Process: 1.6229
+    99th from Process: 4.2293
+
+    Mean from Server: 0.4783
+    50th from Server: 0.3779
+    75th from Server: 0.5606
+    85th from Server: 0.6330
+    95th from Server: 1.4901
+    99th from Server: 3.0577
+
+Rate: 1000/s
+~~~~~~~~~~~~
+
+::
+
+    Total Items: 1000x10 => 10000
+
+    Mean from Process: 22.5660
+    50th from Process: 22.6192
+    75th from Process: 29.6938
+    85th from Process: 32.7271
+    95th from Process: 36.3250
+    99th from Process: 52.2004
+
+    Mean from Server: 21.5786
+    50th from Server: 22.2553
+    75th from Server: 29.5858
+    85th from Server: 32.6861
+    95th from Server: 36.2462
+    99th from Server: 50.9143
+
+::
+
+    google.api_core.exceptions.DeadlineExceeded: 504 Deadline Exceeded
+    Total Items: 1000x60 => 59444
+        > Mismatched Results!
+
+    Mean from Process: 130.5193
+    50th from Process: 129.9185
+    75th from Process: 164.1693
+    85th from Process: 182.9924
+    95th from Process: 206.4429
+    99th from Process: 213.3682
+
+    Mean from Server: 129.2830
+    50th from Server: 128.5045
+    75th from Server: 164.1157
+    85th from Server: 182.4867
+    95th from Server: 206.1908
+    99th from Server: 213.0549
+
+Yeah... this is pointless. You can go ahead and assume the rest of the results
+here basically read: "haha, yeah right, don't do this".
 
 .. _BatchSettings: https://googleapis.dev/python/pubsub/latest/publisher/index.html#batching
 .. _Pub/Sub Architecture: https://cloud.google.com/pubsub/architecture
