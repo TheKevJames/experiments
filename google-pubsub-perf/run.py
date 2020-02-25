@@ -13,11 +13,9 @@ Options:
   -h --help                show this screen
 """
 import concurrent.futures
-import datetime
 import functools
 import multiprocessing
 import multiprocessing.sharedctypes
-import os
 import statistics
 import subprocess
 import time
@@ -122,7 +120,6 @@ def callback(local, server, message):
 def subscribe_async(latencies_local, latencies_server, *, count: int,
                     duration: int, rate: int):
     subscriber = pubsub.SubscriberClient()
-    topic = f'projects/{PROJECT}/topics/{TOPIC}'
     subscription = f'projects/{PROJECT}/subscriptions/{TOPIC}-0'
 
     cb = functools.partial(callback, latencies_local, latencies_server)
@@ -163,8 +160,8 @@ def main(args: dict):
     assert not duration * rate % fn_count, 'Invalid subscriber thread count'
 
     manager = multiprocessing.Manager()
-    latencies_local = manager.list()
-    latencies_server = manager.list()
+    latencies_local: list = manager.list()
+    latencies_server: list = manager.list()
 
     ps = []
     for _ in range(fn_count):
@@ -178,7 +175,8 @@ def main(args: dict):
 
     publish(duration=duration, rate=rate)
 
-    _ = [p.join() for p in ps]
+    for p in ps:
+        p.join()
     print_stats(latencies_local, latencies_server, duration=duration,
                 rate=rate)
 
