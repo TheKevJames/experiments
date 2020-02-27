@@ -102,6 +102,8 @@ Given a productionized publisher should be expected to tweak its batch
 settings for its expected use-case, its probably not unreasonable to assume
 real-world results will be somewhere between these two sets of stats.
 
+Note that all results are captured in seconds.
+
 Async Subscriber
 ^^^^^^^^^^^^^^^^
 
