@@ -1,0 +1,3 @@
+_lib_cffi.*
+app/app.o
+lib/nimcache/*
