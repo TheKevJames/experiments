@@ -6,7 +6,7 @@ This repository is a collection of various one-off experiments.
 - `Docker Image Size Tests`_
 - `Dockerfiles as Bootable VMs in GCP`_ (see associated
   `blog post <https://thekev.in/blog/2019-08-05-dockerfile-bootable-vm/>`__)
-- `Google Pub/Sub Performance Testing`_
+- `Google Pub/Sub Performance Testing`_ (and a `One-off Script Version`_ for more manual testing)
 - `Guild Wars 2 Scripts`_
 - `HTTP Auth with Google KMS`_ (see associated
   `blog post <https://thekev.in/blog/2019-06-15-http-auth-with-google-kms/>`__)
@@ -29,6 +29,7 @@ This repository is a collection of various one-off experiments.
 .. _League of Legends Scripts: https://github.com/TheKevJames/experiments/tree/master/league
 .. _Mini String Manipulations: https://github.com/TheKevJames/experiments/tree/master/string-manips
 .. _Multi-Lang Compatible Nim Library: https://github.com/TheKevJames/experiments/tree/master/multilang-lib
+.. _One-off Script Version: https://github.com/TheKevJames/experiments/tree/master/google-pubsub-oneoff
 .. _Python Datetimes: https://github.com/TheKevJames/experiments/tree/master/python-datetimes
 .. _Sentry Instrumentation Performance Analysis: https://github.com/TheKevJames/experiments/tree/master/sentry-performance
 .. _Tensorflow Optimization: https://github.com/TheKevJames/experiments/tree/master/tensorflow-perf
