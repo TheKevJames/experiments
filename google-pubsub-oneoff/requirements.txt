@@ -1,2 +1,2 @@
 docopt==0.6.2
-google-cloud-pubsub==1.6.1
+google-cloud-pubsub==1.7.0
