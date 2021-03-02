@@ -1,0 +1,19 @@
+Asyncio HTTP Client Perf
+========================
+
+A quick comparison of popular async client libraries for performing HTTP
+requests in Python.
+
+Usage
+-----
+
+Start the server::
+
+    $ make server
+
+Then, in a new shell::
+
+    $ make bench
+
+Results
+-------

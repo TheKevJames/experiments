@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "asyncio-http-perf"
+version = "0.0.0"
+description = ""
+readme = "README.rst"
+
+repository = "https://github.com/TheKevJames/experiments"
+authors = ["Kevin James <KevinJames@thekev.in>"]
+license = "MIT"
+
+[tool.poetry.scripts]
+client = "asyncio_http_perf:app"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+aiohttp = ">=3.0.0,<4.0.0"
+asks = ">=2.0.0,<3.0.0"
+httpx = ">=0.17.0,<0.18.0"
+typer = ">=0.3.0,<0.4.0"
+
+[tool.pytest.ini_options]
+addopts = "-Werror"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
