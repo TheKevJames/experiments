@@ -223,7 +223,7 @@ typing-extensions = {version = ">=3.7.4", markers = "python_version < \"3.8\""}
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b71df1dd40586638143a5a9bfa861186b05afa33844300a37fb71df56c42d6e8"
+content-hash = "a3509361c12671bea1fc1d4972ad42ed68a7a154a1ca3076691fcca1d18d33bc"
 
 [metadata.files]
 aiohttp = [
