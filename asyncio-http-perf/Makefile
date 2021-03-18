@@ -1,3 +1,11 @@
+UNAME := $(shell uname -s)
+ifeq ($(UNAME),Linux)
+	PROCS := $(shell nproc)
+endif
+ifeq ($(UNAME),Darwin)
+	PROCS := $(shell sysctl -n hw.physicalcpu)
+endif
+
 all: README.rst
 
 README.rst: README.src perf.rst
@@ -10,7 +18,7 @@ perf.rst: perf.md
 	pandoc -trst --wrap=none $< >$@
 
 perf.md:
-	hyperfine -w3 --export-markdown results.md \
+	hyperfine -w3 --export-markdown $@ \
 		'poetry run client aiohttp run --count=1' \
 		'poetry run client aiohttp run --count=10' \
 		'poetry run client aiohttp run --count=100' \
@@ -39,7 +47,7 @@ perf.md:
 bench: clean perf.md
 
 server:
-	GOMAXPROCS=$(shell nproc) go run server.go
+	GOMAXPROCS=$(PROCS) go run server.go
 
 clean:
 	rm -f perf.* README.rst
