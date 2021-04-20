@@ -1,0 +1,4 @@
+%{
+  "canvas": {:hex, :canvas, "0.0.1", "4ec7e9f009081e05a08bdba59893f0a5706c7fd8edfef0ddc81d50a5a10293d2", [:mix], [{:wx_utils, "~> 0.0.2", [hex: :wx_utils, repo: "hexpm", optional: false]}], "hexpm", "79701ec91af3f427c6c28522ca19fcc930fd955bd48458d6d316e19b7b0cd2be"},
+  "wx_utils": {:hex, :wx_utils, "0.0.2", "6b3ee8376cf122b0fdbf3f8f511b8083097488aff6d0eb626b97624765ffdf66", [:mix], [], "hexpm", "78bb6d423327e7cf41446a35741fe079fb138a4671d0a01e70223f6219afc3d4"},
+}
