@@ -83,3 +83,47 @@ spec:
       volumes:
         - name: prometheus-storage
           emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: monitoring
+  labels:
+    run: alertmanager
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: alertmanager
+  template:
+    metadata:
+      labels:
+        run: alertmanager
+    spec:
+      containers:
+        - name: alertmanager
+          image: thekevjames/o11y-alertmanager:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 9093
+          resources:
+            limits:
+              cpu: 100m
+              memory: 110Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  selector:
+    run: alertmanager
+  ports:
+  - protocol: TCP
+    port: 9093
+    targetPort: 9093
