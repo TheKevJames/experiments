@@ -84,6 +84,19 @@ spec:
         - name: prometheus-storage
           emptyDir: {}
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  selector:
+    run: prometheus
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -127,3 +140,67 @@ spec:
   - protocol: TCP
     port: 9093
     targetPort: 9093
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    run: grafana
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: grafana
+  template:
+    metadata:
+      labels:
+        run: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: thekevjames/o11y-grafana:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /robots.txt
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 2
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 3000
+            timeoutSeconds: 1
+          resources:
+            limits:
+              cpu: 250m
+              memory: 760Mi
+            requests:
+              cpu: 250m
+              memory: 750Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  selector:
+    run: grafana
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  sessionAffinity: ClientIP
+  type: LoadBalancer
