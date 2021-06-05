@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  namespace: default
+  labels:
+    run: app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: app
+  template:
+    metadata:
+      name: app
+      namespace: default
+      labels:
+        run: app
+    spec:
+      containers:
+        - name: app
+          image: thekevjames/o11y-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 100m
+              memory: 110Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 10
