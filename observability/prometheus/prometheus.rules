@@ -1,0 +1,24 @@
+groups:
+- name: app alerts
+  rules:
+  - alert: High Concurrency
+    expr: max by (kubernetes_pod_name) (system_in_flight_total) > 15
+    for: 1m
+    labels:
+      severity: slack
+    annotations:
+      summary: High number of concurrent tasks
+  - alert: High Error Rate
+    expr: sum(rate(job_failures_total[5m])) / sum(rate(job_latency_seconds_count[5m])) > 0.041
+    for: 1m
+    labels:
+      severity: slack
+    annotations:
+      summary: High number of failing jobs
+  - alert: High Latency
+    expr: histogram_quantile(0.90, sum by (stage, le) (rate(job_latency_seconds_bucket[5m]))) > 10
+    for: 1m
+    labels:
+      severity: slack
+    annotations:
+      summary: High job latency
