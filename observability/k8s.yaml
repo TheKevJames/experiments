@@ -60,6 +60,9 @@ spec:
     metadata:
       labels:
         run: prometheus
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
     spec:
       containers:
         - name: prometheus
@@ -113,6 +116,9 @@ spec:
     metadata:
       labels:
         run: alertmanager
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9093'
     spec:
       containers:
         - name: alertmanager
@@ -157,6 +163,9 @@ spec:
     metadata:
       labels:
         run: grafana
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3000'
     spec:
       containers:
         - name: grafana
