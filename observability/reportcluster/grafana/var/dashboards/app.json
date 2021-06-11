@@ -22,7 +22,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": "thanos-querier",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -117,7 +117,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": "thanos-querier",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -212,7 +212,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": "thanos-querier",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -306,34 +306,6 @@
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
-  "templating": {
-    "list": [
-      {
-        "current": {
-          "selected": true,
-          "text": [
-            "prometheus-a"
-          ],
-          "value": [
-            "prometheus-a"
-          ]
-        },
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": true,
-        "label": "datasource",
-        "multi": true,
-        "name": "datasource",
-        "options": [],
-        "query": "prometheus",
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "type": "datasource"
-      }
-    ]
-  },
   "time": {
     "from": "now-6h",
     "to": "now"

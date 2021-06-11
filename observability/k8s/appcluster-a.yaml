@@ -35,10 +35,10 @@ spec:
           resources:
             limits:
               cpu: 100m
-              memory: 110Mi
+              memory: 64Mi
             requests:
               cpu: 100m
-              memory: 100Mi
+              memory: 64Mi
       restartPolicy: Always
       terminationGracePeriodSeconds: 10
 ---
@@ -48,6 +48,172 @@ metadata:
   name: appcluster-a-monitoring
   labels:
     name: appcluster-a-monitoring
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  labels:
+    name: prometheus-config
+  namespace: appcluster-a-monitoring
+data:
+  prometheus.yaml.tmpl: |-
+    global:
+      scrape_interval: 60s
+      evaluation_interval: 5s
+      external_labels:
+        # N.B. see notes on namespace as cluster emulation
+        cluster: $(POD_NAMESPACE)
+        replica: $(POD_NAME)
+
+    rule_files:
+      - /etc/prometheus/rules/*.yaml
+
+    alerting:
+      alert_relabel_configs:
+      - regex: replica
+        action: labeldrop
+
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+          - "alertmanager.appcluster-a-monitoring.svc:9093"
+
+    scrape_configs:
+      - job_name: 'kubernetes-apiservers'
+        kubernetes_sd_configs:
+        - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          action: keep
+          regex: default;kubernetes;https
+
+      - job_name: 'kubernetes-nodes'
+        kubernetes_sd_configs:
+        - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/${1}/proxy/metrics
+
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_pod_name]
+          action: replace
+          target_label: kubernetes_pod_name
+
+      - job_name: 'kubernetes-cadvisor'
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+        - role: node
+        relabel_configs:
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+      - job_name: 'kubernetes-service-endpoints'
+        kubernetes_sd_configs:
+        - role: endpoints
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          action: replace
+          target_label: __scheme__
+          regex: (https?)
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          action: replace
+          target_label: __address__
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: kubernetes_namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          action: replace
+          target_label: kubernetes_name
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  labels:
+    name: prometheus-rules
+  namespace: appcluster-a-monitoring
+data:
+  app-alerts.yaml: |-
+    groups:
+    - name: app alerts
+      rules:
+      - alert: High Concurrency
+        expr: max by (kubernetes_pod_name) (system_in_flight_total) > 15
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: High number of concurrent tasks
+      - alert: High Error Rate
+        expr: sum(rate(job_failures_total[5m])) / sum(rate(job_latency_seconds_count[5m])) > 0.041
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: High number of failing jobs
+      - alert: High Latency
+        expr: histogram_quantile(0.90, sum by (stage, le) (rate(job_latency_seconds_bucket[5m]))) > 10
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: High job latency
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -71,39 +237,120 @@ spec:
     spec:
       containers:
         - name: prometheus
-          image: thekevjames/o11y-prometheus:latest
+          image: prom/prometheus:v2.27.1
           imagePullPolicy: IfNotPresent
           args:
-            - "--config.file=/etc/prometheus/prometheus.yml"
-            - "--storage.tsdb.path=/prometheus/"
+            - '--config.file=/etc/prometheus-shared/prometheus.yaml'
+            - '--storage.tsdb.path=/prometheus/'
+            - '--web.enable-lifecycle'
+            - '--storage.tsdb.no-lockfile'
+            # N.B. this should almost certainly be higher in production (Thanos recommends 2h).
+            # I have it set low here only for demo purposes.
+            - '--storage.tsdb.min-block-duration=10m'
+            - '--storage.tsdb.max-block-duration=10m'
+            # N.B. this should be "not less than 3x the block size"
+            - '--storage.tsdb.retention.time=1h'
           ports:
             - containerPort: 9090
           resources:
             limits:
               cpu: 100m
-              memory: 510Mi
+              memory: 512Mi
             requests:
               cpu: 100m
-              memory: 500Mi
+              memory: 512Mi
           volumeMounts:
+            - name: prometheus-config-shared
+              mountPath: /etc/prometheus-shared/
+            - name: prometheus-rules
+              mountPath: /etc/prometheus/rules
             - name: prometheus-storage
               mountPath: /prometheus/
+        - name: thanos
+          image: thanosio/thanos:v0.21.1
+          args:
+            - 'sidecar'
+            - '--log.level=info'
+            - '--tsdb.path=/prometheus/'
+            - '--prometheus.url=http://127.0.0.1:9090'
+            - '--objstore.config={type: GCS, config: {bucket: kjames-prometheus-longterm}}'
+            - '--reloader.config-file=/etc/prometheus/prometheus.yaml.tmpl'
+            - '--reloader.config-envsubst-file=/etc/prometheus-shared/prometheus.yaml'
+            - '--reloader.rule-dir=/etc/prometheus/rules/'
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/adc.json
+          ports:
+            - name: http-sidecar
+              containerPort: 10902
+            - name: grpc
+              containerPort: 10901
+          livenessProbe:
+            httpGet:
+              port: 10902
+              path: /-/healthy
+          readinessProbe:
+            httpGet:
+              port: 10902
+              path: /-/ready
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /etc/prometheus
+            - name: prometheus-config-shared
+              mountPath: /etc/prometheus-shared/
+            - name: prometheus-rules
+              mountPath: /etc/prometheus/rules
+            - name: prometheus-storage
+              mountPath: /prometheus/
+            - name: thanos-gcs-creds
+              mountPath: /etc/secret
+              readOnly: false
       volumes:
-        - name: prometheus-storage
+        - name: prometheus-config
+          configMap:
+            defaultMode: 420
+            name: prometheus-config
+        - name: prometheus-config-shared
           emptyDir: {}
+        - name: prometheus-rules
+          configMap:
+            name: prometheus-rules
+        - name: prometheus-storage
+          # TODO: this should be a PVC so we don't lose all non-Thanos'ed data on pod restart
+          emptyDir: {}
+        - name: thanos-gcs-creds
+          secret:
+            secretName: thanos-gcs-creds
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus
+  name: thanos-store-gateway
   namespace: appcluster-a-monitoring
 spec:
   selector:
     run: prometheus
   ports:
     - protocol: TCP
-      port: 9090
-      targetPort: 9090
+      port: 10901
+      targetPort: 10901
+  clusterIP: None
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -134,10 +381,10 @@ spec:
           resources:
             limits:
               cpu: 100m
-              memory: 110Mi
+              memory: 128Mi
             requests:
               cpu: 100m
-              memory: 100Mi
+              memory: 128Mi
 ---
 kind: Service
 apiVersion: v1
