@@ -1,9 +1,16 @@
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: appcluster-b-default
+  labels:
+    name: appcluster-b-default
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app
-  namespace: default
+  namespace: appcluster-b-default
   labels:
     run: app
 spec:
@@ -13,8 +20,6 @@ spec:
       run: app
   template:
     metadata:
-      name: app
-      namespace: default
       labels:
         run: app
       annotations:
@@ -40,15 +45,15 @@ spec:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: monitoring
+  name: appcluster-b-monitoring
   labels:
-    name: monitoring
+    name: appcluster-b-monitoring
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: monitoring
+  namespace: appcluster-b-monitoring
   labels:
     run: prometheus
 spec:
@@ -91,7 +96,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: monitoring
+  namespace: appcluster-b-monitoring
 spec:
   selector:
     run: prometheus
@@ -104,7 +109,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: alertmanager
-  namespace: monitoring
+  namespace: appcluster-b-monitoring
   labels:
     run: alertmanager
 spec:
@@ -138,7 +143,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: alertmanager
-  namespace: monitoring
+  namespace: appcluster-b-monitoring
 spec:
   selector:
     run: alertmanager
@@ -146,70 +151,3 @@ spec:
   - protocol: TCP
     port: 9093
     targetPort: 9093
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: grafana
-  namespace: monitoring
-  labels:
-    run: grafana
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      run: grafana
-  template:
-    metadata:
-      labels:
-        run: grafana
-      annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '3000'
-    spec:
-      containers:
-        - name: grafana
-          image: thekevjames/o11y-grafana:latest
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 3000
-          readinessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /robots.txt
-              port: 3000
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 30
-            successThreshold: 1
-            timeoutSeconds: 2
-          livenessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            successThreshold: 1
-            tcpSocket:
-              port: 3000
-            timeoutSeconds: 1
-          resources:
-            limits:
-              cpu: 250m
-              memory: 760Mi
-            requests:
-              cpu: 250m
-              memory: 750Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: grafana
-  namespace: monitoring
-spec:
-  selector:
-    run: grafana
-  ports:
-    - protocol: TCP
-      port: 3000
-      targetPort: 3000
-  sessionAffinity: ClientIP
-  type: LoadBalancer

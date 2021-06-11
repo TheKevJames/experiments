@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: prometheus-a
+    type: prometheus
+    access: proxy
+    uid: prometheus-a
+    url: "http://prometheus.appcluster-a-monitoring.svc:9090"
+    version: 1
+  - name: prometheus-b
+    type: prometheus
+    access: proxy
+    uid: prometheus-b
+    url: "http://prometheus.appcluster-b-monitoring.svc:9090"
+    version: 1

@@ -10,7 +10,11 @@ alerting:
   - scheme: http
     static_configs:
     - targets:
-      - "alertmanager.monitoring.svc:9093"
+      # Note: this is a hack to support docker-for-mac. In the real world,
+      # you'd configure all your clusters to have eg. a namespace named
+      # "monitoring".
+      - "alertmanager.appcluster-a-monitoring.svc:9093"
+      - "alertmanager.appcluster-b-monitoring.svc:9093"
 
 scrape_configs:
   - job_name: 'kubernetes-apiservers'

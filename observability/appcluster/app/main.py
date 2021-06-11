@@ -23,8 +23,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 # These don't seem to work with async methods
-#@IN_FLIGHT.track_inprogress()
-#@FAILURES.count_exceptions()
+# @IN_FLIGHT.track_inprogress()
+# @FAILURES.count_exceptions()
 async def worker(version: int) -> None:
     """
     metrics:
@@ -42,7 +42,8 @@ async def worker(version: int) -> None:
     """
     IN_FLIGHT.inc()
     try:
-        VERSION.info({'version': f'x.y.{version}', 'host': socket.gethostname()})
+        VERSION.info({'version': f'x.y.{version}',
+                      'host': socket.gethostname()})
 
         with LATENCY.labels('extract').time():
             STATE.state('extract')
@@ -70,7 +71,6 @@ async def worker(version: int) -> None:
         raise
     finally:
         IN_FLIGHT.dec()
-
 
 
 class Shutdown:
