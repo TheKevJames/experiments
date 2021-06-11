@@ -754,3 +754,462 @@ spec:
       name: http
       port: 9093
       targetPort: 10902
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  namespace: reportcluster-a-monitoring
+data:
+  promtail.yaml: |-
+    server:
+      http_listen_port: 9080
+      grpc_listen_port: 0
+
+    positions:
+      filename: /tmp/positions.yaml
+
+    clients:
+      - url: http://loki.reportcluster-a-monitoring.svc:3100/loki/api/v1/push
+
+    scrape_configs:
+    - job_name: kubernetes-pods-name
+      kubernetes_sd_configs:
+      - role: pod
+      pipeline_stages: []
+      relabel_configs:
+      - source_labels:
+        - __meta_kubernetes_pod_label_name
+        target_label: __service__
+      - source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: __host__
+      - action: drop
+        regex: '^$'
+        source_labels:
+        - __service__
+      - action: replace
+        replacement: '$1'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_namespace
+        - __service__
+        target_label: job
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: instance
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_container_name
+        target_label: container_name
+      - replacement: '/var/log/pods/*$1/*.log'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_pod_uid
+        - __meta_kubernetes_pod_container_name
+        target_label: __path__
+    - job_name: kubernetes-pods-app
+      kubernetes_sd_configs:
+      - role: pod
+      pipeline_stages: []
+      relabel_configs:
+      - action: drop
+        regex: '.+'
+        source_labels:
+        - __meta_kubernetes_pod_label_name
+      - source_labels:
+        - __meta_kubernetes_pod_label_app
+        target_label: __service__
+      - source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: __host__
+      - action: drop
+        regex: '^$'
+        source_labels:
+        - __service__
+      - action: replace
+        replacement: '$1'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_namespace
+        - __service__
+        target_label: job
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: instance
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_container_name
+        target_label: container_name
+      - replacement: '/var/log/pods/*$1/*.log'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_pod_uid
+        - __meta_kubernetes_pod_container_name
+        target_label: __path__
+    - job_name: kubernetes-pods-direct-controllers
+      kubernetes_sd_configs:
+      - role: pod
+      pipeline_stages: []
+      relabel_configs:
+      - action: drop
+        regex: '.+'
+        separator: ''
+        source_labels:
+        - __meta_kubernetes_pod_label_name
+        - __meta_kubernetes_pod_label_app
+      - action: drop
+        regex: '^([0-9a-z-.]+)(-[0-9a-f]{8,10})$'
+        source_labels:
+        - __meta_kubernetes_pod_controller_name
+      - source_labels:
+        - __meta_kubernetes_pod_controller_name
+        target_label: __service__
+      - source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: __host__
+      - action: drop
+        regex: '^$'
+        source_labels:
+        - __service__
+      - action: replace
+        replacement: '$1'
+        separator: /
+        source_labels:
+        - __meta_kubernetes_namespace
+        - __service__
+        target_label: job
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: instance
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_container_name
+        target_label: container_name
+      - replacement: '/var/log/pods/*$1/*.log'
+        separator: /
+        source_labels:
+        - __meta_kubernetes_pod_uid
+        - __meta_kubernetes_pod_container_name
+        target_label: __path__
+    - job_name: kubernetes-pods-indirect-controller
+      kubernetes_sd_configs:
+      - role: pod
+      pipeline_stages: []
+      relabel_configs:
+      - action: drop
+        regex: '.+'
+        separator: ''
+        source_labels:
+        - __meta_kubernetes_pod_label_name
+        - __meta_kubernetes_pod_label_app
+      - action: keep
+        regex: '^([0-9a-z-.]+)(-[0-9a-f]{8,10})$'
+        source_labels:
+        - __meta_kubernetes_pod_controller_name
+      - action: replace
+        regex: '^([0-9a-z-.]+)(-[0-9a-f]{8,10})$'
+        source_labels:
+        - __meta_kubernetes_pod_controller_name
+        target_label: __service__
+      - source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: __host__
+      - action: drop
+        regex: '^$'
+        source_labels:
+        - __service__
+      - action: replace
+        replacement: '$1'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_namespace
+        - __service__
+        target_label: job
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: instance
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_container_name
+        target_label: container_name
+      - replacement: '/var/log/pods/*$1/*.log'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_pod_uid
+        - __meta_kubernetes_pod_container_name
+        target_label: __path__
+    - job_name: kubernetes-pods-static
+      kubernetes_sd_configs:
+      - role: pod
+      pipeline_stages: []
+      relabel_configs:
+      - action: drop
+        regex: '^$'
+        source_labels:
+        - __meta_kubernetes_pod_annotation_kubernetes_io_config_mirror
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_label_component
+        target_label: __service__
+      - source_labels:
+        - __meta_kubernetes_pod_node_name
+        target_label: __host__
+      - action: drop
+        regex: '^$'
+        source_labels:
+        - __service__
+      - action: replace
+        replacement: '$1'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_namespace
+        - __service__
+        target_label: job
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_namespace
+        target_label: namespace
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_name
+        target_label: instance
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_container_name
+        target_label: container_name
+      - replacement: '/var/log/pods/*$1/*.log'
+        separator: '/'
+        source_labels:
+        - __meta_kubernetes_pod_annotation_kubernetes_io_config_mirror
+        - __meta_kubernetes_pod_container_name
+        target_label: __path__
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: reportcluster-a-monitoring
+spec:
+  selector:
+    matchLabels:
+      name: promtail
+  template:
+    metadata:
+      labels:
+        name: promtail
+    spec:
+      containers:
+        - name: promtail
+          image: grafana/promtail:2.2.1
+          args:
+          - '-config.file=/etc/promtail/promtail.yaml'
+          env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          volumeMounts:
+          - name: config
+            mountPath: /etc/promtail
+          - name: logs-docker
+            mountPath: /var/lib/docker/containers
+            readOnly: true
+          - name: logs-varlog
+            mountPath: /var/log
+      volumes:
+      - name: config
+        configMap:
+          name: promtail-config
+      - name: logs-varlog
+        hostPath:
+          path: /var/log
+      - name: logs-docker
+        hostPath:
+          path: /var/lib/docker/containers
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-config
+  namespace: reportcluster-a-monitoring
+data:
+  # TODO: split this apart a bit (defaults to all features enabled). Need to split compactor, at least,
+  # since it's supposed to be a singleton
+  loki.yaml: |-
+    auth_enabled: false
+
+    server:
+      http_listen_port: 3100
+      grpc_listen_port: 9096
+
+    ingester:
+      wal:
+        enabled: true
+        dir: /tmp/wal
+      lifecycler:
+        address: 127.0.0.1
+        ring:
+          kvstore:
+            store: inmemory
+          replication_factor: 1
+        final_sleep: 0s
+      # N.B. as for prometheus & thanos, these are artifically low for demo purposes
+      chunk_idle_period: 10m
+      max_chunk_age: 10m
+      chunk_target_size: 1048576
+      chunk_retain_period: 30s
+      max_transfer_retries: 0
+
+    schema_config:
+      configs:
+        - from: 2000-01-01
+          store: boltdb-shipper
+          object_store: gcs
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: /tmp/loki/index
+        shared_store: gcs
+        cache_location: /tmp/loki/boltdb-cache
+      gcs:
+        bucket_name: kjames-loki
+
+    compactor:
+      working_directory: /tmp/loki/compactor
+      shared_store: filesystem
+      compaction_interval: 5m
+
+    limits_config:
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+
+    chunk_store_config:
+      max_look_back_period: 0s
+
+    table_manager:
+      retention_deletes_enabled: false
+      retention_period: 0s
+
+    ruler:
+      storage:
+        type: local
+        local:
+          directory: /tmp/loki/rules
+      rule_path: /tmp/loki/rules-temp
+      alertmanager_url: http://alertmanager.reportcluster-a-monitoring.svc:9093
+      ring:
+        kvstore:
+          store: inmemory
+      enable_api: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: reportcluster-a-monitoring
+  labels:
+    run: loki
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: loki
+  template:
+    metadata:
+      labels:
+        run: loki
+    spec:
+      containers:
+        - name: loki
+          image: grafana/loki:2.2.1
+          args:
+          - '-config.file=/etc/loki/loki.yaml'
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/adc.json
+          ports:
+            - name: http
+              containerPort: 3100
+            - name: grpc
+              containerPort: 9096
+          # TODO: liveness and readiness probes
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            # TODO: pvc for ingestor storage
+            - name: config
+              mountPath: /etc/loki
+            - name: thanos-gcs-creds
+              mountPath: /etc/secret
+              readOnly: false
+      volumes:
+        - name: config
+          configMap:
+            name: loki-config
+        - name: thanos-gcs-creds  # TODO: rename
+          secret:
+            secretName: thanos-gcs-creds
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: reportcluster-a-monitoring
+spec:
+  selector:
+    run: loki
+  ports:
+    - protocol: TCP
+      port: 3100
+      targetPort: 3100
+  clusterIP: None
+  type: ClusterIP

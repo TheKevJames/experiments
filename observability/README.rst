@@ -1,14 +1,20 @@
 TODO
 ====
 
-* node-exporter
-* kube-state-metrics
-* tweak resources
-* grafana v8 ngalerts given thanos-query proxy
-* thanos query frontend?
-* log stack
-* trace stack
-* grafana auth
+* logs:
+  * json parser
+  * handle dynamic ``extra`` values
+  * examplars?
+* traces
+* metrics:
+  * investigate value of thanos query frontend
+  * figure out grafana v8 ngalerts integration given thanos-query proxy usage
+  * node-exporter and kube-state-metrics:
+    * https://www.metricfire.com/blog/ha-kubernetes-monitoring-using-prometheus-and-thanos
+  * determine ideal resource configs
+  * configure grafana auth
+* misc:
+  * see promtail: matchLabels run->name
 
 READMEify Me
 ------------
