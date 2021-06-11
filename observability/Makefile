@@ -31,3 +31,25 @@ deploy: build clean-for-deploy
 	kubectl set image -n appcluster-b-monitoring deployment/alertmanager alertmanager=thekevjames/o11y-alertmanager:$(TAG)
 	kubectl set image -n reportcluster-a-monitoring deployment/alertmanager alertmanager=thekevjames/o11y-alertmanager:$(TAG)
 	kubectl set image -n reportcluster-a-monitoring deployment/grafana grafana=thekevjames/o11y-grafana:$(TAG)
+
+clean: clean-for-deploy
+	kubectl get service --all-namespaces \
+		| grep -v '^default' | grep -v '^kube-node-lease' | grep -v '^kube-public' | grep -v '^kube-system' | grep -v 'NAMESPACE' \
+		| awk '{print "-n" $$1, $$2}' \
+		| xargs -n2 kubectl delete service
+	kubectl get deployment --all-namespaces \
+		| grep -v '^default' | grep -v '^kube-node-lease' | grep -v '^kube-public' | grep -v '^kube-system' | grep -v 'NAMESPACE' \
+		| awk '{print "-n" $$1, $$2}' \
+		| xargs -n2 kubectl delete deployment
+	kubectl get configmap --all-namespaces \
+		| grep -v '^default' | grep -v '^kube-node-lease' | grep -v '^kube-public' | grep -v '^kube-system' | grep -v 'NAMESPACE' \
+		| awk '{print "-n" $$1, $$2}' \
+		| xargs -n2 kubectl delete configmap
+	kubectl get secret --all-namespaces \
+		| grep -v '^default' | grep -v '^kube-node-lease' | grep -v '^kube-public' | grep -v '^kube-system' | grep -v 'NAMESPACE' \
+		| awk '{print "-n" $$1, $$2}' \
+		| xargs -n2 kubectl delete secret
+	kubectl delete ns \
+		appcluster-a-default appcluster-a-monitoring \
+		appcluster-b-default appcluster-b-monitoring \
+		reportcluster-a-monitoring ||:
