@@ -1,13 +1,10 @@
 TODO
 ====
 
-* grafana v8, federated alerts
 * node-exporter
 * kube-state-metrics
-* dashboards -> recording rules?
-* backfill alerts from https://github.com/thanos-io/thanos/blob/main/examples/alerts/alerts.md:
-  * or, probably, sample a couple as a minimal example
 * tweak resources
+* grafana v8 ngalerts given thanos-query proxy
 * thanos query frontend?
 * log stack
 * trace stack
@@ -26,4 +23,4 @@ kubectl port-forward -nreportcluster-a-monitoring service/thanos-ruler 9093:9093
 
 kubectl port-forward -nreportcluster-a-monitoring service/thanos-querier 9090:9090
 
-kubectl port-forward -nreportcluster-a-monitoring service/grafana 3000:3000
+grafana at :3000
