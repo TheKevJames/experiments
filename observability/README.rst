@@ -22,6 +22,7 @@ Explain ns -> clusters
 What corresponds to what, maybe break apart k8s files
 Full walkthrough and reasoning for tech choices and location placement
 make USER=foo
+include expectations eg. "you're assumed to add things like resource limits"
 
 kubectl port-forward -nappcluster-a-monitoring service/alertmanager 9093:9093
 kubectl port-forward -nreportcluster-a-monitoring service/thanos-ruler 9093:9093

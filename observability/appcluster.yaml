@@ -28,13 +28,6 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
-          resources:
-            limits:
-              cpu: 100m
-              memory: 64Mi
-            requests:
-              cpu: 100m
-              memory: 64Mi
       restartPolicy: Always
       terminationGracePeriodSeconds: 10
 ---
@@ -240,13 +233,6 @@ spec:
             - '--storage.tsdb.retention.time=1h'
           ports:
             - containerPort: 9090
-          resources:
-            limits:
-              cpu: 100m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 512Mi
           volumeMounts:
             - name: prometheus-config-shared
               mountPath: /etc/prometheus-shared/
@@ -289,13 +275,6 @@ spec:
             httpGet:
               port: 10902
               path: /-/ready
-          resources:
-            limits:
-              cpu: 100m
-              memory: 128Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi
           volumeMounts:
             - name: prometheus-config
               mountPath: /etc/prometheus
@@ -364,13 +343,6 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 9093
-          resources:
-            limits:
-              cpu: 100m
-              memory: 128Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi
 ---
 kind: Service
 apiVersion: v1
@@ -668,13 +640,6 @@ spec:
           ports:
             - name: http
               containerPort: 80
-          resources:
-            limits:
-              cpu: 100m
-              memory: 128Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi
           securityContext:
             privileged: true
             runAsUser: 0

@@ -224,13 +224,6 @@ spec:
             - '--storage.tsdb.retention.time=1h'
           ports:
             - containerPort: 9090
-          resources:
-            limits:
-              cpu: 100m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 512Mi
           volumeMounts:
             - name: prometheus-config-shared
               mountPath: /etc/prometheus-shared/
@@ -273,13 +266,6 @@ spec:
             httpGet:
               port: 10902
               path: /-/ready
-          resources:
-            limits:
-              cpu: 100m
-              memory: 128Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi
           volumeMounts:
             - name: prometheus-config
               mountPath: /etc/prometheus
@@ -347,13 +333,6 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 9093
-          resources:
-            limits:
-              cpu: 100m
-              memory: 128Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi
 ---
 kind: Service
 apiVersion: v1
@@ -410,13 +389,6 @@ spec:
             tcpSocket:
               port: 3000
             timeoutSeconds: 1
-          resources:
-            limits:
-              cpu: 250m
-              memory: 768Mi
-            requests:
-              cpu: 250m
-              memory: 768Mi
 ---
 apiVersion: v1
 kind: Service
@@ -474,13 +446,6 @@ spec:
             httpGet:
               port: 10902
               path: /-/ready
-          resources:
-            limits:
-              cpu: 100m
-              memory: 512Mi
-            requests:
-              cpu: 100m
-              memory: 512Mi
           volumeMounts:
             - name: thanos-gcs-creds
               mountPath: /etc/secret
@@ -545,13 +510,6 @@ spec:
           httpGet:
             port: http
             path: /-/ready
-        resources:
-          limits:
-            cpu: 100m
-            memory: 128Mi
-          requests:
-            cpu: 100m
-            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -608,13 +566,6 @@ spec:
             httpGet:
               port: 10902
               path: /-/ready
-          resources:
-            limits:
-              cpu: 100m
-              memory: 256Mi
-            requests:
-              cpu: 100m
-              memory: 256Mi
           volumeMounts:
             - name: thanos-gcs-creds
               mountPath: /etc/secret
@@ -696,13 +647,6 @@ spec:
             httpGet:
               port: http
               path: /-/ready
-          resources:
-            limits:
-              cpu: 100m
-              memory: 64Mi
-            requests:
-              cpu: 100m
-              memory: 64Mi
           volumeMounts:
             - name: config
               mountPath: /etc/thanos-ruler
@@ -1020,13 +964,6 @@ spec:
           ports:
             - name: http
               containerPort: 80
-          resources:
-            limits:
-              cpu: 100m
-              memory: 128Mi
-            requests:
-              cpu: 100m
-              memory: 128Mi
           securityContext:
             privileged: true
             runAsUser: 0
@@ -1157,13 +1094,6 @@ spec:
             - name: grpc
               containerPort: 9096
           # TODO: liveness and readiness probes
-          resources:
-            limits:
-              cpu: 100m
-              memory: 256Mi
-            requests:
-              cpu: 100m
-              memory: 256Mi
           volumeMounts:
             # TODO: pvc for ingestor storage
             - name: config
