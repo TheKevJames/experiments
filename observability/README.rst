@@ -6,7 +6,9 @@ TODO
   * handle dynamic ``extra`` values
   * examplars?
   * promtail ready probe fix
-* traces
+* traces:
+  * consider using grafana-agent for prometheus/loki forwarding?
+    * fix: grafana-agent needs to enumerate destinations, so does loki
 * metrics:
   * investigate value of thanos query frontend
   * figure out grafana v8 ngalerts integration given thanos-query proxy usage

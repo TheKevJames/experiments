@@ -1,11 +1,18 @@
 import asyncio
 import logging
+import os
 import signal
 import socket
 import random
 import uuid
 
 import prometheus_client
+import opentelemetry.sdk.resources
+import opentelemetry.sdk.trace
+import opentelemetry.sdk.trace.export
+import opentelemetry.trace
+from opentelemetry.exporter.otlp.proto.grpc import trace_exporter
+from pythonjsonlogger import jsonlogger
 
 
 LATENCY = prometheus_client.Histogram('job_latency_seconds', 'Job latency',
@@ -18,8 +25,9 @@ STATE = prometheus_client.Enum('job_state', 'Current job state',
                                states=['extract', 'transform', 'load'])
 VERSION = prometheus_client.Info('worker_version', 'Current worker version')
 
+
 logger = logging.getLogger('app.main')
-logging.basicConfig(level=logging.INFO)
+tracer = opentelemetry.trace.get_tracer(__name__)
 
 
 # These don't seem to work with async methods
@@ -40,37 +48,46 @@ async def worker(version: int) -> None:
     tracing:
       TODO
     """
-    IN_FLIGHT.inc()
-    try:
-        VERSION.info({'version': f'x.y.{version}',
-                      'host': socket.gethostname()})
+    with tracer.start_as_current_span('worker'):
+        IN_FLIGHT.inc()
+        try:
+            VERSION.info({'version': f'x.y.{version}',
+                          'host': socket.gethostname()})
 
-        with LATENCY.labels('extract').time():
-            STATE.state('extract')
-            job_id = str(uuid.uuid4())
-            job_kind = random.choice(['foo', 'bar', 'baz'])
-            logger.info('starting job', extra={'id': job_id, 'kind': job_kind})
-            if random.random() < 0.01:
-                raise Exception('failed to extract')
+            with tracer.start_as_current_span('extract'):
+                with LATENCY.labels('extract').time():
+                    STATE.state('extract')
+                    job_id = str(uuid.uuid4())
+                    job_kind = random.choice(['foo', 'bar', 'baz'])
+                    trace = (opentelemetry.trace.get_current_span()
+                             .get_span_context().trace_id)
+                    logger.info('starting job',
+                                extra={'id': job_id,
+                                       'kind': job_kind,
+                                       'trace': f'{trace:032x}'})
+                    if random.random() < 0.01:
+                        raise Exception('failed to extract')
 
-        with LATENCY.labels('transform').time():
-            STATE.state('transform')
-            failure_ratio = 0.1 if job_kind == 'foo' else 0.05
-            if random.random() < failure_ratio:
-                await asyncio.sleep(0.1)
-                raise Exception('failed to transform')
-            else:
-                await asyncio.sleep(random.paretovariate(1))
+            with tracer.start_as_current_span('transform'):
+                with LATENCY.labels('transform').time():
+                    STATE.state('transform')
+                    failure_ratio = 0.1 if job_kind == 'foo' else 0.05
+                    if random.random() < failure_ratio:
+                        await asyncio.sleep(0.1)
+                        raise Exception('failed to transform')
+                    else:
+                        await asyncio.sleep(random.paretovariate(1))
 
-        with LATENCY.labels('load').time():
-            STATE.state('load')
-            if random.random() < 0.02:
-                raise Exception('failed to load')
-    except Exception:
-        FAILURES.inc()
-        raise
-    finally:
-        IN_FLIGHT.dec()
+            with tracer.start_as_current_span('load'):
+                with LATENCY.labels('load').time():
+                    STATE.state('load')
+                    if random.random() < 0.02:
+                        raise Exception('failed to load')
+        except Exception:
+            FAILURES.inc()
+            raise
+        finally:
+            IN_FLIGHT.dec()
 
 
 class Shutdown:
@@ -114,6 +131,26 @@ async def main() -> None:
 
 
 if __name__ == '__main__':
+    logHandler = logging.StreamHandler()
+    formatter = jsonlogger.JsonFormatter()
+    logHandler.setFormatter(formatter)
+    logger.addHandler(logHandler)
+    logger.setLevel(logging.INFO)
+
+    provider = opentelemetry.sdk.trace.TracerProvider(
+        resource=opentelemetry.sdk.resources.Resource(attributes={
+            opentelemetry.sdk.resources.SERVICE_NAME: 'app',
+        }))
+    # N.B. the namespace would be constant if not for the cluster->namespace
+    # hack used to test multi-cluster
+    namespace = os.environ['POD_NAMESPACE'].replace('default', 'monitoring')
+    provider.add_span_processor(
+        opentelemetry.sdk.trace.export.BatchSpanProcessor(
+            trace_exporter.OTLPSpanExporter(
+                endpoint=f'http://grafana-agent.{namespace}.svc:4317',
+                insecure=True)))
+    opentelemetry.trace.set_tracer_provider(provider)
+
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

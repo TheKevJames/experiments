@@ -1,5 +1,5 @@
 TAG:=$(shell date +%s)
-USER?=o11y@thekev.in
+USER:=$(shell gcloud config get-value core/account 2>/dev/null)
 
 
 all: deploy

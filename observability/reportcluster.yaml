@@ -881,6 +881,15 @@ data:
         uid: loki
         url: "http://loki:3100"
         version: 1
+  tempo.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: tempo
+        type: tempo
+        access: proxy
+        uid: tempo
+        url: "http://tempo:3100"
+        version: 1
   prometheus.yaml: |-
     apiVersion: 1
     datasources:
@@ -1683,6 +1692,106 @@ metadata:
 spec:
   selector:
     name: loki
+  ports:
+    - protocol: TCP
+      port: 3100
+      targetPort: 3100
+  clusterIP: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-config
+  namespace: CLUSTER-monitoring
+data:
+  tempo.yaml: |-
+    server:
+      http_listen_port: 3100
+
+    # TODO: is it possible to disable the distributor and ingestor here?
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+
+    compactor:
+      compaction:
+        block_retention: 168h
+        compacted_block_retention: 10m
+        compaction_window: 1h
+      ring:
+        kvstore:
+          store: memberlist
+
+    storage:
+      trace:
+        backend: gcs
+        block:
+          bloom_filter_false_positive: .05
+          index_downsample_bytes: 1000
+          encoding: zstd
+        wal:
+          path: /tmp/tempo/wal
+          encoding: none
+        gcs:
+          bucket_name: kjames-tempo
+        pool:
+          max_workers: 100
+          queue_depth: 10000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  namespace: CLUSTER-monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: tempo
+  template:
+    metadata:
+      labels:
+        name: tempo
+    spec:
+      containers:
+        - name: tempo
+          image: grafana/tempo:1.0.1
+          args:
+          - '-config.file=/etc/tempo/tempo.yaml'
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/adc.json
+          ports:
+            - name: query
+              containerPort: 3100
+            - name: health
+              containerPort: 9095
+          # TODO: liveness and readiness probes
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tempo
+            - name: thanos-gcs-creds
+              mountPath: /etc/secret
+              readOnly: false
+      volumes:
+        - name: config
+          configMap:
+            name: tempo-config
+        - name: thanos-gcs-creds  # TODO: rename
+          secret:
+            secretName: thanos-gcs-creds
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  namespace: CLUSTER-monitoring
+spec:
+  selector:
+    name: tempo
   ports:
     - protocol: TCP
       port: 3100

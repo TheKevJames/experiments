@@ -26,6 +26,11 @@ spec:
         - name: app
           image: thekevjames/o11y-app:latest
           imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           ports:
             - containerPort: 8080
       restartPolicy: Always
@@ -691,3 +696,173 @@ spec:
       - name: logs-docker
         hostPath:
           path: /var/lib/docker/containers
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-agent-config
+  namespace: CLUSTER-monitoring
+data:
+  agent.yaml: |-
+    tempo:
+      configs:
+      - name: default
+        receivers:
+          otlp:
+            protocols:
+              grpc:
+        remote_write:
+          - endpoint: 'tempo.CLUSTER-monitoring.svc:4317'
+            insecure: true
+        batch:
+          timeout: 5s
+          send_batch_size: 100
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-agent
+  namespace: CLUSTER-monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: grafana-agent
+  template:
+    metadata:
+      labels:
+        name: grafana-agent
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9095'
+    spec:
+      containers:
+        - name: agent
+          image: grafana/agent:v0.15.0
+          args:
+          - '-config.file=/etc/agent/agent.yaml'
+          ports:
+            - name: ingest
+              containerPort: 4317
+            - name: health
+              containerPort: 9095
+          # TODO: liveness and readiness probes
+          volumeMounts:
+            - name: config
+              mountPath: /etc/agent
+      volumes:
+        - name: config
+          configMap:
+            name: grafana-agent-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-agent
+  namespace: CLUSTER-monitoring
+spec:
+  selector:
+    name: grafana-agent
+  ports:
+    - protocol: TCP
+      port: 4317
+      targetPort: 4317
+  clusterIP: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-config
+  namespace: CLUSTER-monitoring
+data:
+  tempo.yaml: |-
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+
+    ingester:
+      trace_idle_period: 10s
+      max_block_bytes: 1_000_000
+      max_block_duration: 5m
+
+    # TODO: is it possible to disable the querier and compactor here?
+
+    storage:
+      trace:
+        backend: gcs
+        block:
+          bloom_filter_false_positive: .05
+          index_downsample_bytes: 1000
+          encoding: zstd
+        wal:
+          path: /tmp/tempo/wal
+          encoding: none
+        gcs:
+          bucket_name: kjames-tempo
+        pool:
+          max_workers: 100
+          queue_depth: 10000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  namespace: CLUSTER-monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: tempo
+  template:
+    metadata:
+      labels:
+        name: tempo
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9095'
+    spec:
+      containers:
+        - name: tempo
+          image: grafana/tempo:1.0.1
+          args:
+          - '-config.file=/etc/tempo/tempo.yaml'
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/adc.json
+          ports:
+            - name: ingest
+              containerPort: 4317
+            - name: health
+              containerPort: 9095
+          # TODO: liveness and readiness probes
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tempo
+            - name: thanos-gcs-creds
+              mountPath: /etc/secret
+              readOnly: false
+      volumes:
+        - name: config
+          configMap:
+            name: tempo-config
+        - name: thanos-gcs-creds  # TODO: rename
+          secret:
+            secretName: thanos-gcs-creds
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  namespace: CLUSTER-monitoring
+spec:
+  selector:
+    name: tempo
+  ports:
+    - protocol: TCP
+      port: 4317
+      targetPort: 4317
+  clusterIP: None
+  type: ClusterIP
