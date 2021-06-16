@@ -5,6 +5,7 @@ TODO
   * json parser
   * handle dynamic ``extra`` values
   * examplars?
+  * promtail ready probe fix
 * traces
 * metrics:
   * investigate value of thanos query frontend
@@ -13,8 +14,6 @@ TODO
     * https://www.metricfire.com/blog/ha-kubernetes-monitoring-using-prometheus-and-thanos
   * determine ideal resource configs
   * configure grafana auth
-* misc:
-  * see promtail: matchLabels run->name
 
 READMEify Me
 ------------
