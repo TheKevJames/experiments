@@ -1,8 +1,121 @@
+# A reporting cluster is meant to include absolutely no user code, but rather
+# be used solely to aggregate, explore, and alert on your telemetry. It is
+# responsible for actually parsing and interfacing with the data emitted by
+# your application clusters.
+# Since there's no non-monitoring code, everything will live in the monitoring
+# namespace.
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: CLUSTER-monitoring
+# First off, we'll deploy a prometheus and thanos deployment in the same way as
+# we did in the app cluster -- after all, we want to monitoring everything in
+# the reporting cluster as well! Note that the configuration is exactly the
+# same here until we get to the rules config.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: CLUSTER-monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: prometheus
+  template:
+    metadata:
+      labels:
+        name: prometheus
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9090'
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.27.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - '--config.file=/etc/prometheus-shared/prometheus.yaml'
+            - '--storage.tsdb.path=/prometheus/'
+            - '--web.enable-lifecycle'
+            - '--storage.tsdb.no-lockfile'
+            - '--storage.tsdb.min-block-duration=10m'
+            - '--storage.tsdb.max-block-duration=10m'
+            - '--storage.tsdb.retention.time=1h'
+          ports:
+            - name: prometheus-api
+              containerPort: 9090
+          volumeMounts:
+            - name: prometheus-config-shared
+              mountPath: /etc/prometheus-shared/
+            - name: prometheus-rules
+              mountPath: /etc/prometheus/rules
+            - name: prometheus-storage
+              mountPath: /prometheus/
+        - name: thanos
+          image: thanosio/thanos:v0.21.1
+          args:
+            - 'sidecar'
+            - '--log.level=info'
+            - '--tsdb.path=/prometheus/'
+            - '--prometheus.url=http://127.0.0.1:9090'
+            - '--objstore.config={type: GCS, config: {bucket: kjames-prometheus-longterm}}'
+            - '--reloader.config-file=/etc/prometheus/prometheus.yaml.tmpl'
+            - '--reloader.config-envsubst-file=/etc/prometheus-shared/prometheus.yaml'
+            - '--reloader.rule-dir=/etc/prometheus/rules/'
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/adc.json
+          ports:
+            - name: thanos-http
+              containerPort: 10902
+            - name: prometheus-api
+              containerPort: 10901
+          livenessProbe:
+            httpGet:
+              port: 10902
+              path: /-/healthy
+          readinessProbe:
+            httpGet:
+              port: 10902
+              path: /-/ready
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /etc/prometheus
+            - name: prometheus-config-shared
+              mountPath: /etc/prometheus-shared/
+            - name: prometheus-rules
+              mountPath: /etc/prometheus/rules
+            - name: prometheus-storage
+              mountPath: /prometheus/
+            - name: thanos-gcs-creds
+              mountPath: /etc/secret
+              readOnly: false
+      volumes:
+        - name: prometheus-config
+          configMap:
+            defaultMode: 420
+            name: prometheus-config
+        - name: prometheus-config-shared
+          emptyDir: {}
+        - name: prometheus-rules
+          configMap:
+            name: prometheus-rules
+        - name: prometheus-storage
+          emptyDir: {}
+        - name: thanos-gcs-creds
+          secret:
+            secretName: thanos-gcs-creds
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -15,7 +128,6 @@ data:
       scrape_interval: 60s
       evaluation_interval: 5s
       external_labels:
-        # N.B. see notes on namespace as cluster emulation
         cluster: $(POD_NAMESPACE)
         replica: $(POD_NAME)
 
@@ -142,6 +254,12 @@ metadata:
     name: prometheus-rules
   namespace: CLUSTER-monitoring
 data:
+  # Differences between the appcluster prometheus and the reportcluster
+  # prometheus begin here, since we'll want to be monitoring different things
+  # in the reporting cluster. This is just a minimal example: you wouuld
+  # ideally include monitors for all reporting components here. These are, like
+  # in the application cluster, cluster-local alerts rather than being
+  # aggregated across clusters.
   ruler-alerts.yaml: |-
     groups:
     - name: ruler alerts
@@ -189,111 +307,6 @@ data:
         labels:
           severity: critical
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: prometheus
-  namespace: CLUSTER-monitoring
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      name: prometheus
-  template:
-    metadata:
-      labels:
-        name: prometheus
-      annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9090'
-    spec:
-      containers:
-        - name: prometheus
-          image: prom/prometheus:v2.27.1
-          imagePullPolicy: IfNotPresent
-          args:
-            - '--config.file=/etc/prometheus-shared/prometheus.yaml'
-            - '--storage.tsdb.path=/prometheus/'
-            - '--web.enable-lifecycle'
-            - '--storage.tsdb.no-lockfile'
-            # N.B. this should almost certainly be higher in production (Thanos recommends 2h).
-            # I have it set low here only for demo purposes.
-            - '--storage.tsdb.min-block-duration=10m'
-            - '--storage.tsdb.max-block-duration=10m'
-            # N.B. this should be "not less than 3x the block size"
-            - '--storage.tsdb.retention.time=1h'
-          ports:
-            - containerPort: 9090
-          volumeMounts:
-            - name: prometheus-config-shared
-              mountPath: /etc/prometheus-shared/
-            - name: prometheus-rules
-              mountPath: /etc/prometheus/rules
-            - name: prometheus-storage
-              mountPath: /prometheus/
-        - name: thanos
-          image: thanosio/thanos:v0.21.1
-          args:
-            - 'sidecar'
-            - '--log.level=info'
-            - '--tsdb.path=/prometheus/'
-            - '--prometheus.url=http://127.0.0.1:9090'
-            - '--objstore.config={type: GCS, config: {bucket: kjames-prometheus-longterm}}'
-            - '--reloader.config-file=/etc/prometheus/prometheus.yaml.tmpl'
-            - '--reloader.config-envsubst-file=/etc/prometheus-shared/prometheus.yaml'
-            - '--reloader.rule-dir=/etc/prometheus/rules/'
-          env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /etc/secret/adc.json
-          ports:
-            - name: http-sidecar
-              containerPort: 10902
-            - name: grpc
-              containerPort: 10901
-          livenessProbe:
-            httpGet:
-              port: 10902
-              path: /-/healthy
-          readinessProbe:
-            httpGet:
-              port: 10902
-              path: /-/ready
-          volumeMounts:
-            - name: prometheus-config
-              mountPath: /etc/prometheus
-            - name: prometheus-config-shared
-              mountPath: /etc/prometheus-shared/
-            - name: prometheus-rules
-              mountPath: /etc/prometheus/rules
-            - name: prometheus-storage
-              mountPath: /prometheus/
-            - name: thanos-gcs-creds
-              mountPath: /etc/secret
-              readOnly: false
-      volumes:
-        - name: prometheus-config
-          configMap:
-            defaultMode: 420
-            name: prometheus-config
-        - name: prometheus-config-shared
-          emptyDir: {}
-        - name: prometheus-rules
-          configMap:
-            name: prometheus-rules
-        - name: prometheus-storage
-          emptyDir: {}
-        - name: thanos-gcs-creds
-          secret:
-            secretName: thanos-gcs-creds
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -308,29 +321,9 @@ spec:
       targetPort: 10901
   clusterIP: None
   type: ClusterIP
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: alertmanager-config
-  namespace: CLUSTER-monitoring
-data:
-  alertmanager.yml: |-
-    global:
-      resolve_timeout: 5m
-
-    route:
-      group_by: ['alertname', 'cluster']
-      group_wait: 10s
-      group_interval: 10s
-      repeat_interval: 1h
-      receiver: 'webhook.site'
-
-    receivers:
-      - name: 'webhook.site'
-        webhook_configs:
-        # https://webhook.site/#!/b46fe156-506d-4376-9050-93694845380b
-        - url: 'https://webhook.site/b46fe156-506d-4376-9050-93694845380b'
+# The alertmanager config is the same as for the appcluster as well. Note that
+# this is for alerts local to the reportcluster, eg. Grafana downtime and such
+# would be reported here.
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -364,6 +357,28 @@ spec:
         configMap:
           name: alertmanager-config
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: CLUSTER-monitoring
+data:
+  alertmanager.yml: |-
+    global:
+      resolve_timeout: 5m
+
+    route:
+      group_by: ['alertname', 'cluster']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 1h
+      receiver: 'webhook.site'
+
+    receivers:
+      - name: 'webhook.site'
+        webhook_configs:
+        - url: 'https://webhook.site/b46fe156-506d-4376-9050-93694845380b'
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -376,6 +391,77 @@ spec:
   - protocol: TCP
     port: 9093
     targetPort: 9093
+# Here's where we get to the stuff unique to the reporting cluster: Grafana
+# will be used as a frontend for exploring all our Telemetry and be the only
+# user-facing view into our system. Any Grafana instance in any reporting
+# cluster should be able to query our long-term storage and/or our live app
+# clusters as need be.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: CLUSTER-monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: grafana
+  template:
+    metadata:
+      labels:
+        name: grafana
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '3000'
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:8.0.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: grafana-http
+              containerPort: 3000
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /robots.txt
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 2
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 3000
+            timeoutSeconds: 1
+          volumeMounts:
+          - name: config
+            mountPath: /etc/grafana
+          - name: dashboards
+            mountPath: /var/lib/grafana/dashboards
+          - name: provisioning-dashboards
+            mountPath: /etc/grafana/provisioning/dashboards
+          - name: provisioning-datasources
+            mountPath: /etc/grafana/provisioning/datasources
+      volumes:
+      - name: config
+        configMap:
+          name: grafana-config
+      - name: dashboards
+        configMap:
+          name: grafana-dashboards
+      - name: provisioning-dashboards
+        configMap:
+          name: grafana-provisioning-dashboards
+      - name: provisioning-datasources
+        configMap:
+          name: grafana-provisioning-datasources
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -383,15 +469,24 @@ metadata:
   name: grafana-config
   namespace: CLUSTER-monitoring
 data:
+  # Note that there's a whole bunch more you might want to configure about
+  # Grafana. See:
+  # https://grafana.com/docs/grafana/latest/administration/configuration/
+  # For the set of things which matter to us, rather than being defaults used
+  # for demo purposes, I've given an explanation inline.
   grafana.ini: |-
     [server]
+    ; Once you expose this properly via an Ingress and real domain, you'll want
+    ; to match this up. For example, you might expose this as a subdomain such
+    ; as `grafana.thekev.in`
     http_port = 3000
-    ;domain = localhost
-    ;enforce_domain = false
-    ;root_url = http://localhost:3000
+    domain = localhost
     enable_gzip = true
 
     [session]
+    ; Using anything outside of in-memory sessions will make load balancing
+    ; across instances a bit tricky. Note the `sessionAffinity` config in our
+    ; Service entry below ensures users hit the same instance if available.
     provider = memory
 
     [analytics]
@@ -399,8 +494,10 @@ data:
     check_for_updates = false
 
     [security]
-    ;admin_user = admin
-    ;admin_password = admin
+    ; You'll definitely want to change these before exposing Grafana to the
+    ; world. See the various `auth.*` options for the available providers.
+    admin_user = admin
+    admin_password = admin
 
     [snapshots]
     external_enabled = false
@@ -413,85 +510,9 @@ data:
 
     default_theme = dark
 
-    [auth]
-    ;disable_login_form = true
-    ;disable_signout_menu = false
-
-    #################################### Anonymous Auth ##########################
-    [auth.anonymous]
-    ;enabled = false
-    ;org_name = Main Org.
-    ;org_role = Viewer
-
-    #################################### Github Auth ##########################
-    [auth.github]
-    ;enabled = false
-    ;allow_sign_up = true
-    ;client_id = some_id
-    ;client_secret = some_secret
-    ;scopes = user:email,read:org
-    ;auth_url = https://github.com/login/oauth/authorize
-    ;token_url = https://github.com/login/oauth/access_token
-    ;api_url = https://api.github.com/user
-    ;team_ids =
-    ;allowed_organizations =
-
-    #################################### Google Auth ##########################
-    [auth.google]
-    ;enabled = false
-    ;allow_sign_up = true
-    ;client_id = some_client_id
-    ;client_secret = some_client_secret
-    ;scopes = https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email
-    ;auth_url = https://accounts.google.com/o/oauth2/auth
-    ;token_url = https://accounts.google.com/o/oauth2/token
-    ;api_url = https://www.googleapis.com/oauth2/v1/userinfo
-    ;allowed_domains =
-
-    #################################### Generic OAuth ##########################
-    [auth.generic_oauth]
-    ;enabled = false
-    ;name = OAuth
-    ;allow_sign_up = true
-    ;client_id = some_id
-    ;client_secret = some_secret
-    ;scopes = user:email,read:org
-    ;auth_url = https://foo.bar/login/oauth/authorize
-    ;token_url = https://foo.bar/login/oauth/access_token
-    ;api_url = https://foo.bar/user
-    ;team_ids =
-    ;allowed_organizations =
-
-    #################################### Grafana.com Auth ####################
-    [auth.grafana_com]
-    ;enabled = false
-    ;allow_sign_up = true
-    ;client_id = some_id
-    ;client_secret = some_secret
-    ;scopes = user:email
-    ;allowed_organizations =
-
-    #################################### Auth Proxy ##########################
-    [auth.proxy]
-    ;enabled = false
-    ;header_name = X-WEBAUTH-USER
-    ;header_property = username
-    ;auto_sign_up = true
-    ;ldap_sync_ttl = 60
-    ;whitelist = 192.168.1.1, 192.168.2.1
-
-    #################################### Basic Auth ##########################
-    [auth.basic]
-    ;enabled = true
-
-    #################################### Auth LDAP ##########################
-    [auth.ldap]
-    ;enabled = false
-    ;config_file = /etc/grafana/ldap.toml
-    ;allow_sign_up = true
-
-    #################################### Logging ##########################
     [log]
+    ; Since Promtail will be scraping console logs, we don't need to do
+    ; anything complicated here.
     mode = console
     ;level = info
 
@@ -499,27 +520,32 @@ data:
     ;level =
     ;format = console
 
-    #################################### Dashboard JSON files ##########################
     [dashboards.json]
+    ; We'll be pre-provisioning our dashboards below in a configmap. This will
+    ; allow us to do cool things like including our dashboards in source
+    ; control and ensuring they don't drift between Grafana instances.
     enabled = true
     path = /var/lib/grafana/dashboards
 
-    #################################### Alerting ############################
     [alerting]
+    ; Grafana v8 introduced "ngalerts", which should allow us to view and
+    ; interact with our configured alerts across all our clusters and across
+    ; both Prometheus-style and ThanosRuler-style alerts. TODO finish
+    ; configuring this.
     enabled = true
+    ; Though we want to be able to view the alerts, we already have
+    ; alertmanager for actually processing them. TODO investigate whether using
+    ; Grafana here could simplify things.
     execute_alerts = false
 
-    #################################### Internal Grafana Metrics ##########################
     [metrics]
+    ; ie. metrics which Prometheus will scrape and which will eventually be
+    ; made available to Grafana. Meta monitoring!
     ;enabled = true
     ;interval_seconds  = 10
 
-    #################################### Grafana.com integration  ##########################
-    [grafana_com]
-    ;url = https://grafana.com
-
-    #################################### Feature Toggles  ##########################
     [feature_toggles]
+    ; See Grafana v8 alerts comment above.
     enable = ngalert
 ---
 apiVersion: v1
@@ -528,6 +554,9 @@ metadata:
   name: grafana-dashboards
   namespace: CLUSTER-monitoring
 data:
+  # This is a sample Grafana dashboard which will show off the three metrics
+  # our sample app exposes. TODO: I should extend this further to include
+  # interesting logs, traces, examplars, alert thresholds, etc, etc.
   app.json: |-
     {
       "annotations": {
@@ -857,8 +886,14 @@ data:
   default.yaml: |-
     apiVersion: 1
     providers:
+      # This will allow Grafana to load defined dashboards (such as the
+      # app.json file above) from disk on startup, to ensure all Grafana
+      # instances get the same configs.
       - name: preload
         type: file
+        # We'll disable deletion and modification in the UI to ensure users
+        # must check changes into source control and prevent our instance
+        # configs from drifting or having changes be lost on pod restart.
         disableDeletion: true
         updateIntervalSeconds: 10
         allowUiUpdates: false
@@ -872,6 +907,10 @@ metadata:
   name: grafana-provisioning-datasources
   namespace: CLUSTER-monitoring
 data:
+  # We'll also provision the various datasources which users may want to query:
+  # loki for logs, tempo for traces, and thanos-querier for metrics. Note that
+  # each will be explained below, but it's worth mentioning now that each of
+  # these endpoints is cluster local rather than being eg. in an app cluster.
   loki.yaml: |-
     apiVersion: 1
     datasources:
@@ -897,73 +936,8 @@ data:
         type: prometheus
         access: proxy
         uid: thanos-querier
-        url: "http://thanos-querier:9090"
+        url: "http://thanos-querier:10902"
         version: 1
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: grafana
-  namespace: CLUSTER-monitoring
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      name: grafana
-  template:
-    metadata:
-      labels:
-        name: grafana
-      annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '3000'
-    spec:
-      containers:
-        - name: grafana
-          image: grafana/grafana:8.0.1
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 3000
-          readinessProbe:
-            failureThreshold: 3
-            httpGet:
-              path: /robots.txt
-              port: 3000
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 30
-            successThreshold: 1
-            timeoutSeconds: 2
-          livenessProbe:
-            failureThreshold: 3
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            successThreshold: 1
-            tcpSocket:
-              port: 3000
-            timeoutSeconds: 1
-          volumeMounts:
-          - name: config
-            mountPath: /etc/grafana
-          - name: dashboards
-            mountPath: /var/lib/grafana/dashboards
-          - name: provisioning-dashboards
-            mountPath: /etc/grafana/provisioning/dashboards
-          - name: provisioning-datasources
-            mountPath: /etc/grafana/provisioning/datasources
-      volumes:
-      - name: config
-        configMap:
-          name: grafana-config
-      - name: dashboards
-        configMap:
-          name: grafana-dashboards
-      - name: provisioning-dashboards
-        configMap:
-          name: grafana-provisioning-dashboards
-      - name: provisioning-datasources
-        configMap:
-          name: grafana-provisioning-datasources
 ---
 apiVersion: v1
 kind: Service
@@ -977,6 +951,11 @@ spec:
     - protocol: TCP
       port: 3000
       targetPort: 3000
+  # Note that this is the only Service which is meant to be used outside the
+  # cluster, so I've assigned it here a session affinity to ensure users hit
+  # the same instance when possible to avoid invalidating their session.
+  # In the real world, you'll likely want to add an Ingress path along with tls
+  # certs, etc. See also configuring Grafana for actual auth above.
   sessionAffinity: ClientIP
   type: LoadBalancer
 ---
@@ -996,6 +975,15 @@ spec:
         name: thanos-store-gateway-longterm
     spec:
       containers:
+        # This Thanos instance is a bit different than the others in the app
+        # clusters -- it is not a sidecar, but rather an instance of the Thanos
+        # Store API. Rather than being responsible for accepting any metrics,
+        # it is used strictly to *pull* long term metrics down from our
+        # permanent storage and make them available to Grafana.
+        # In essence, to query all available metrics we will need to query the
+        # normal thanos-store-gateway in each cluster (for recent metrics on
+        # that cluster) *and* the thanos-store-gateway-longterm here (for older
+        # metrics on all clusters). We'll get to that eventually.
         - name: thanos
           image: thanosio/thanos:v0.21.1
           args:
@@ -1009,9 +997,9 @@ spec:
             - name : GOOGLE_APPLICATION_CREDENTIALS
               value: /etc/secret/adc.json
           ports:
-          - name: http
+          - name: thanos-api
             containerPort: 10902
-          - name: grpc
+          - name: prometheus-api
             containerPort: 10901
           livenessProbe:
             httpGet:
@@ -1061,29 +1049,58 @@ spec:
         name: thanos-querier
     spec:
       containers:
+      # Speaking of Thanos deployments with different goals, this one is the
+      # querier. This is the only one which Grafana will hit *directly* and
+      # will be responsible for fanning out to whichever other instance might
+      # be relevant to the query.
+      # We'll need to list here all the prometheus endpoints which we want to
+      # be able to query.
       - name: thanos
         image: thanosio/thanos:v0.21.1
         args:
         - 'query'
         - '--log.level=info'
+        # As mentioned way back when in the appcluster config, we'll be using
+        # this "replica" label to de-duplicate results. Identical metrics with
+        # differing replica values will be deduped to allow us to run multiple
+        # prometheus instances scraping the same data.
         - '--query.replica-label=replica'
+        # Note that referencing the non-longterm gateways is not strictly
+        # necessary here and does introduce the requirement that your reporting
+        # cluster must be able to enumerate your application clusters.
+        # By including this here, we allow our dashboards to include fully
+        # up-to-date metrics. If we only care to explore long-term data, this
+        # is not necessary.
+        # Note that since alertmanager is also running locally in each cluster
+        # for cluster-local metrics, omitting these would not impact having
+        # realtime alerting (for *non-cluster-aggregated alerts*, see Thanos
+        # Rules config).
+        # Another option, not explored in this demo, would be to run Grafana
+        # instances in each cluster or make them trivial to spin up for adhoc
+        # cases where you need more up-to-date metrics. That flow may provide
+        # a happy medium wherein the reporting clusters can be agnostic of our
+        # application clusters and debugging of realtime metrics can be
+        # performed as need be. Since the Thanos gateways are already running
+        # in each cluster, it would simply be a matter of spinning up a
+        # temporary Grafana pointed to the given address: a saved `kubectl run`
+        # command could probably do the trick!
         - '--store=thanos-store-gateway.appcluster-a-monitoring.svc:10901'
         - '--store=thanos-store-gateway.appcluster-b-monitoring.svc:10901'
         - '--store=thanos-store-gateway.CLUSTER-monitoring.svc:10901'
         - '--store=thanos-store-gateway-longterm.CLUSTER-monitoring.svc:10901'
         - '--store=thanos-ruler.CLUSTER-monitoring.svc:10901'
         ports:
-        - name: http
+        - name: thanos-http
           containerPort: 10902
-        - name: grpc
+        - name: prometheus-api
           containerPort: 10901
         livenessProbe:
           httpGet:
-            port: http
+            port: thanos-http
             path: /-/healthy
         readinessProbe:
           httpGet:
-            port: http
+            port: thanos-http
             path: /-/ready
 ---
 apiVersion: v1
@@ -1095,8 +1112,14 @@ spec:
   selector:
     name: thanos-querier
   ports:
+  # TODO: I think this implies I misunderstood the whole thanos-http vs
+  # prometheus-api thing... looks like both are the API and the former is just
+  # *also* the website? Likely http vs grpc, so we could probably switch this
+  # over to grpc and nuke the http configs globally / clarify that they're
+  # exposed solely for demo purposes. Is there any reason we'd need the http
+  # endpoints in prod?
   - protocol: TCP
-    port: 9090
+    port: 10902
     targetPort: 10902
 ---
 apiVersion: apps/v1
@@ -1105,10 +1128,13 @@ metadata:
   name: thanos-compactor
   namespace: CLUSTER-monitoring
 spec:
-  # N.B. this is the only system not deployed with multiple replicas in this demo
-  # Note that this is intentional -- the Thanos Compactor must be run as a singleton
-  # and does not pose a system availability issue if it is not running.
+  # This is the only system not deployed with multiple replicas in this demo.
+  # Note that this is intentional -- the Thanos Compactor must be run as a
+  # singleton and does not pose a system availability issue if it is not
+  # running since it is purely for optimization purposes.
   # See https://thanos.io/tip/thanos/quick-tutorial.md/#compactor
+  # TODO: figure out a way to keep this a singleton with multiple reporting
+  # clusters.
   replicas: 1
   selector:
     matchLabels:
@@ -1131,7 +1157,7 @@ spec:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /etc/secret/adc.json
           ports:
-            - name: http
+            - name: thanos-http
               containerPort: 10902
           livenessProbe:
             httpGet:
@@ -1149,25 +1175,6 @@ spec:
         - name: thanos-gcs-creds
           secret:
             secretName: thanos-gcs-creds
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: thanos-ruler-rules
-  namespace: CLUSTER-monitoring
-data:
-  prometheus.yaml: |
-    groups:
-    - name: global prometheus alerts
-      rules:
-      - alert: Prometheus Replica Down
-        annotations:
-          message: Prometheus replica in cluster {{$labels.cluster}} has disappeared from Prometheus target discovery.
-        # TODO: this doesn't look right
-        expr: sum(up{instance=~".*:9090", job="kubernetes-service-endpoints"}) by (job,cluster) < 2
-        for: 15s
-        labels:
-          severity: critical
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -1185,6 +1192,12 @@ spec:
         name: thanos-ruler
     spec:
       containers:
+        # The Thanos Ruler is Thanos' implementation of the Prometheus rules
+        # engine, which is capable of alerting upon aggregated data. Alerts
+        # here should be used lightly (see risks section mentioned in the
+        # config) and only for things which require that level of aggregation;
+        # eg. think system-wide SLOs with daily reports rather than realtime
+        # alerts of downtime.
         - name: thanos
           image: thanosio/thanos:v0.21.1
           args:
@@ -1193,9 +1206,18 @@ spec:
             - '--data-dir=/data'
             - '--eval-interval=15s'
             - '--rule-file=/etc/thanos-ruler/*.yaml'
+            # We'll reuse the alertmanager in this cluster for sending out the
+            # alerts -- no need to have a second alertmanager, since Thanos
+            # Ruler knows how to emit things in standard Prometheus format.
             - '--alertmanagers.url=http://alertmanager.CLUSTER-monitoring.svc:9093'
-            - '--query=thanos-querier.CLUSTER-monitoring.svc:9090'
+            # We'll be querying the thanos-querier service defined above, which
+            # lets us fan out to all available metric sources.
+            - '--query=thanos-querier.CLUSTER-monitoring.svc:10902'
             - '--objstore.config={type: GCS, config: {bucket: kjames-thanos-ruler}}'
+            # Note that we do the same grouping and deduping logic as we do in
+            # our non-aggregated alerts, since we can have multiple Thanos
+            # Ruler instances in the same reporting cluster (or even multiple
+            # alerting clusters) and those need to get deduped as well.
             - '--label=ruler_cluster="$(POD_NAMESPACE)"'
             - '--label=replica="$(POD_NAME)"'
           env:
@@ -1210,17 +1232,17 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
           ports:
-            - name: http
+            - name: thanos-http
               containerPort: 10902
-            - name: grpc
+            - name: prometheus-api
               containerPort: 10901
           livenessProbe:
             httpGet:
-              port: http
+              port: 10902
               path: /-/healthy
           readinessProbe:
             httpGet:
-              port: http
+              port: 10902
               path: /-/ready
           volumeMounts:
             - name: config
@@ -1235,6 +1257,30 @@ spec:
         - name: thanos-gcs-creds
           secret:
             secretName: thanos-gcs-creds
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: thanos-ruler-rules
+  namespace: CLUSTER-monitoring
+data:
+  # Note that these are the previously-mentioned Thanos Ruler alerts, eg. those
+  # which apply to the entire set of aggregated clusters we're managing. See
+  # again the following doc for why you should use these as lightly as
+  # possible:
+  # https://thanos.io/tip/components/rule.md/#risk
+  prometheus.yaml: |
+    groups:
+    - name: global prometheus alerts
+      rules:
+      - alert: Prometheus Replica Down
+        annotations:
+          message: Prometheus replica in cluster {{$labels.cluster}} has disappeared from Prometheus target discovery.
+        # TODO: this expression doesn't look right
+        expr: sum(up{instance=~".*:9090", job="kubernetes-service-endpoints"}) by (job,cluster) < 2
+        for: 15s
+        labels:
+          severity: critical
 ---
 apiVersion: v1
 kind: Service
@@ -1253,8 +1299,65 @@ spec:
       targetPort: 10901
     - protocol: TCP
       name: http
-      port: 9093
+      port: 10902
       targetPort: 10902
+# Promtail is configured the same way here as in the app cluster; we want to
+# scrape logs from eg. Grafana as well as our own apps!
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: CLUSTER-monitoring
+spec:
+  selector:
+    matchLabels:
+      name: promtail
+  template:
+    metadata:
+      labels:
+        name: promtail
+    spec:
+      containers:
+        - name: promtail
+          image: grafana/promtail:2.2.1
+          args:
+          - '-config.file=/etc/promtail/promtail.yaml'
+          env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 10
+          ports:
+            - name: promtail-http
+              containerPort: 80
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          volumeMounts:
+          - name: config
+            mountPath: /etc/promtail
+          - name: logs-docker
+            mountPath: /var/lib/docker/containers
+            readOnly: true
+          - name: logs-varlog
+            mountPath: /var/log
+      volumes:
+      - name: config
+        configMap:
+          name: promtail-config
+      - name: logs-varlog
+        hostPath:
+          path: /var/log
+      - name: logs-docker
+        hostPath:
+          path: /var/lib/docker/containers
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1264,7 +1367,7 @@ metadata:
 data:
   promtail.yaml: |-
     server:
-      http_listen_port: 9080
+      http_listen_port: 0
       grpc_listen_port: 0
 
     positions:
@@ -1507,59 +1610,53 @@ data:
         target_label: __path__
 ---
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
-  name: promtail
+  name: loki
   namespace: CLUSTER-monitoring
 spec:
+  replicas: 2
   selector:
     matchLabels:
-      name: promtail
+      name: loki
   template:
     metadata:
       labels:
-        name: promtail
+        name: loki
     spec:
       containers:
-        - name: promtail
-          image: grafana/promtail:2.2.1
+        # TODO: this needs to get split apart -- currently this Loki instance
+        # is handling ingestion directly from the app clusters, which isn't
+        # correct. Ideally, this would be readonly (or, both, I suppose, since
+        # we want to ingest local logs...) and the appclusters would have
+        # writeonly versions.
+        - name: loki
+          image: grafana/loki:2.2.1
           args:
-          - '-config.file=/etc/promtail/promtail.yaml'
+          - '-config.file=/etc/loki/loki.yaml'
           env:
-          - name: HOSTNAME
-            valueFrom:
-              fieldRef:
-                fieldPath: spec.nodeName
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: http
-              scheme: HTTP
-            initialDelaySeconds: 10
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/adc.json
           ports:
-            - name: http
-              containerPort: 80
-          securityContext:
-            privileged: true
-            runAsUser: 0
+            # TODO: figure out these ports
+            - name: loki-http
+              containerPort: 3100
+            - name: loki-grpc
+              containerPort: 9096
           volumeMounts:
-          - name: config
-            mountPath: /etc/promtail
-          - name: logs-docker
-            mountPath: /var/lib/docker/containers
-            readOnly: true
-          - name: logs-varlog
-            mountPath: /var/log
+            # TODO: pvc for ingestor storage
+            - name: config
+              mountPath: /etc/loki
+            - name: thanos-gcs-creds
+              mountPath: /etc/secret
+              readOnly: false
       volumes:
-      - name: config
-        configMap:
-          name: promtail-config
-      - name: logs-varlog
-        hostPath:
-          path: /var/log
-      - name: logs-docker
-        hostPath:
-          path: /var/lib/docker/containers
+        - name: config
+          configMap:
+            name: loki-config
+        - name: thanos-gcs-creds
+          secret:
+            secretName: thanos-gcs-creds
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1567,8 +1664,8 @@ metadata:
   name: loki-config
   namespace: CLUSTER-monitoring
 data:
-  # TODO: split this apart a bit (defaults to all features enabled). Need to split compactor, at least,
-  # since it's supposed to be a singleton
+  # TODO: split this apart a bit (defaults to all features enabled). Need to
+  # split compactor, at least, since it's supposed to be a singleton
   loki.yaml: |-
     auth_enabled: false
 
@@ -1587,7 +1684,6 @@ data:
             store: inmemory
           replication_factor: 1
         final_sleep: 0s
-      # N.B. as for prometheus & thanos, these are artifically low for demo purposes
       chunk_idle_period: 10m
       max_chunk_age: 10m
       chunk_target_size: 1048576
@@ -1640,50 +1736,6 @@ data:
           store: inmemory
       enable_api: true
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: loki
-  namespace: CLUSTER-monitoring
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      name: loki
-  template:
-    metadata:
-      labels:
-        name: loki
-    spec:
-      containers:
-        - name: loki
-          image: grafana/loki:2.2.1
-          args:
-          - '-config.file=/etc/loki/loki.yaml'
-          env:
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /etc/secret/adc.json
-          ports:
-            - name: http
-              containerPort: 3100
-            - name: grpc
-              containerPort: 9096
-          # TODO: liveness and readiness probes
-          volumeMounts:
-            # TODO: pvc for ingestor storage
-            - name: config
-              mountPath: /etc/loki
-            - name: thanos-gcs-creds
-              mountPath: /etc/secret
-              readOnly: false
-      volumes:
-        - name: config
-          configMap:
-            name: loki-config
-        - name: thanos-gcs-creds  # TODO: rename
-          secret:
-            secretName: thanos-gcs-creds
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -1698,6 +1750,53 @@ spec:
       targetPort: 3100
   clusterIP: None
   type: ClusterIP
+# Finally, Tempo is responsible for dealing with traces. Since we don't have
+# anything relevant to trace within the reporting clusters, the Tempo config
+# here doesn't need to worry about ingestion and can be focused solely on being
+# queryable by Grafana.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  namespace: CLUSTER-monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: tempo
+  template:
+    metadata:
+      labels:
+        name: tempo
+    spec:
+      containers:
+        - name: tempo
+          image: grafana/tempo:1.0.1
+          args:
+          - '-config.file=/etc/tempo/tempo.yaml'
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/adc.json
+          ports:
+            # TODO: naming?
+            - name: tempo-api
+              containerPort: 3100
+            - name: metrics
+              containerPort: 9095
+          volumeMounts:
+            - name: config
+              mountPath: /etc/tempo
+            - name: thanos-gcs-creds
+              mountPath: /etc/secret
+              readOnly: false
+      volumes:
+        - name: config
+          configMap:
+            name: tempo-config
+        - name: thanos-gcs-creds
+          secret:
+            secretName: thanos-gcs-creds
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -1709,7 +1808,12 @@ data:
     server:
       http_listen_port: 3100
 
-    # TODO: is it possible to disable the distributor and ingestor here?
+    # TODO: note that every Tempo instance includes the distributor and
+    # ingestor (for ingestion), the querier and query-frontend (for querying),
+    # and the compactor (for ongoing maintenance of long-term storage). I would
+    # love to figure out how to disable the distributor and ingestor within the
+    # reporting clusters.
+
     distributor:
       receivers:
         otlp:
@@ -1740,49 +1844,6 @@ data:
         pool:
           max_workers: 100
           queue_depth: 10000
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: tempo
-  namespace: CLUSTER-monitoring
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      name: tempo
-  template:
-    metadata:
-      labels:
-        name: tempo
-    spec:
-      containers:
-        - name: tempo
-          image: grafana/tempo:1.0.1
-          args:
-          - '-config.file=/etc/tempo/tempo.yaml'
-          env:
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /etc/secret/adc.json
-          ports:
-            - name: query
-              containerPort: 3100
-            - name: health
-              containerPort: 9095
-          # TODO: liveness and readiness probes
-          volumeMounts:
-            - name: config
-              mountPath: /etc/tempo
-            - name: thanos-gcs-creds
-              mountPath: /etc/secret
-              readOnly: false
-      volumes:
-        - name: config
-          configMap:
-            name: tempo-config
-        - name: thanos-gcs-creds  # TODO: rename
-          secret:
-            secretName: thanos-gcs-creds
 ---
 apiVersion: v1
 kind: Service
