@@ -14,8 +14,7 @@ build/reportcluster-a.yaml: reportcluster.yaml build
 	sed 's/CLUSTER/reportcluster-a/g' $< > $@
 
 build-images:
-	docker build -t thekevjames/o11y-app:$(TAG) appcluster/app
-	docker build -t thekevjames/o11y-alertmanager:$(TAG) appcluster/alertmanager
+	docker build -t thekevjames/o11y-app:$(TAG) app
 	docker build -t thekevjames/o11y-grafana:$(TAG) reportcluster/grafana
 
 clean-for-deploy:
@@ -36,9 +35,6 @@ deploy: build/appcluster-a.yaml build/appcluster-b.yaml build/reportcluster-a.ya
 		--from-file=$(HOME)/.config/gcloud/legacy_credentials/$(USER)/adc.json
 	kubectl set image -n appcluster-a-default deployment/app app=thekevjames/o11y-app:$(TAG)
 	kubectl set image -n appcluster-b-default deployment/app app=thekevjames/o11y-app:$(TAG)
-	kubectl set image -n appcluster-a-monitoring deployment/alertmanager alertmanager=thekevjames/o11y-alertmanager:$(TAG)
-	kubectl set image -n appcluster-b-monitoring deployment/alertmanager alertmanager=thekevjames/o11y-alertmanager:$(TAG)
-	kubectl set image -n reportcluster-a-monitoring deployment/alertmanager alertmanager=thekevjames/o11y-alertmanager:$(TAG)
 	kubectl set image -n reportcluster-a-monitoring deployment/grafana grafana=thekevjames/o11y-grafana:$(TAG)
 
 clean: clean-for-deploy
