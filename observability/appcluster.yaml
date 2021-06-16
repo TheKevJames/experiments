@@ -2,15 +2,15 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: appcluster-b-default
+  name: CLUSTER-default
   labels:
-    name: appcluster-b-default
+    name: CLUSTER-default
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: app
-  namespace: appcluster-b-default
+  namespace: CLUSTER-default
   labels:
     run: app
 spec:
@@ -45,9 +45,9 @@ spec:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: appcluster-b-monitoring
+  name: CLUSTER-monitoring
   labels:
-    name: appcluster-b-monitoring
+    name: CLUSTER-monitoring
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -55,7 +55,7 @@ metadata:
   name: prometheus-config
   labels:
     name: prometheus-config
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
 data:
   prometheus.yaml.tmpl: |-
     global:
@@ -78,7 +78,7 @@ data:
       - scheme: http
         static_configs:
         - targets:
-          - "alertmanager.appcluster-b-monitoring.svc:9093"
+          - "alertmanager.CLUSTER-monitoring.svc:9093"
 
     scrape_configs:
       - job_name: 'kubernetes-apiservers'
@@ -187,7 +187,7 @@ metadata:
   name: prometheus-rules
   labels:
     name: prometheus-rules
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
 data:
   app-alerts.yaml: |-
     groups:
@@ -219,7 +219,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
   labels:
     run: prometheus
 spec:
@@ -341,7 +341,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: thanos-store-gateway
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
 spec:
   selector:
     run: prometheus
@@ -356,7 +356,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: alertmanager
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
   labels:
     run: alertmanager
 spec:
@@ -390,7 +390,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: alertmanager
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
 spec:
   selector:
     run: alertmanager
@@ -403,7 +403,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: promtail-config
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
 data:
   promtail.yaml: |-
     server:
@@ -653,7 +653,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: promtail
-  namespace: appcluster-b-monitoring
+  namespace: CLUSTER-monitoring
 spec:
   selector:
     matchLabels:

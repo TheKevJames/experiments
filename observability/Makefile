@@ -5,6 +5,15 @@ USER?=o11y@thekev.in
 all: deploy
 
 build:
+	mkdir $@
+build/appcluster-a.yaml: appcluster.yaml build
+	sed 's/CLUSTER/appcluster-a/g' $< > $@
+build/appcluster-b.yaml: appcluster.yaml build
+	sed 's/CLUSTER/appcluster-b/g' $< > $@
+build/reportcluster-a.yaml: reportcluster.yaml build
+	sed 's/CLUSTER/reportcluster-a/g' $< > $@
+
+build-images:
 	docker build -t thekevjames/o11y-app:$(TAG) appcluster/app
 	docker build -t thekevjames/o11y-alertmanager:$(TAG) appcluster/alertmanager
 	docker build -t thekevjames/o11y-grafana:$(TAG) reportcluster/grafana
@@ -14,8 +23,8 @@ clean-for-deploy:
 	kubectl delete secret -n appcluster-b-monitoring thanos-gcs-creds |:
 	kubectl delete secret -n reportcluster-a-monitoring thanos-gcs-creds |:
 
-deploy: build clean-for-deploy
-	kubectl apply -f k8s/
+deploy: build/appcluster-a.yaml build/appcluster-b.yaml build/reportcluster-a.yaml build-images clean-for-deploy
+	kubectl apply -f build/
 	kubectl create secret generic thanos-gcs-creds \
 		-n appcluster-a-monitoring \
 		--from-file=$(HOME)/.config/gcloud/legacy_credentials/$(USER)/adc.json
@@ -33,6 +42,7 @@ deploy: build clean-for-deploy
 	kubectl set image -n reportcluster-a-monitoring deployment/grafana grafana=thekevjames/o11y-grafana:$(TAG)
 
 clean: clean-for-deploy
+	rm -rf build/
 	kubectl get service --all-namespaces \
 		| grep -v '^default' | grep -v '^kube-node-lease' | grep -v '^kube-public' | grep -v '^kube-system' | grep -v 'NAMESPACE' \
 		| awk '{print "-n" $$1, $$2}' \
