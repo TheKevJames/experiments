@@ -2,7 +2,10 @@ TAG:=$(shell date +%s)
 USER:=$(shell gcloud config get-value core/account 2>/dev/null)
 
 
-all: deploy
+all: deploy architecture.png
+
+architecture.png: architecture.dot
+	dot -Tpng $< > $@
 
 build:
 	mkdir $@

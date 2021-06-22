@@ -1,0 +1,109 @@
+digraph G {
+    newrank=true;
+
+    subgraph cluster_cloud {
+        label = "External Systems";
+
+        "GCS";
+        "PagerDuty";
+    }
+
+    subgraph cluster_app {
+        label = "Application Cluster";
+        node [style=filled];
+
+        subgraph cluster_app_ns_system {
+            label = "System Namespace";
+
+            "app-syslog" [label="syslog"];
+        }
+
+        subgraph cluster_app_ns_default {
+            label = "Default Namespace";
+
+            "app-0";
+            "app-1";
+            "app-2";
+        }
+
+        "app-0" -> "app-syslog"[constraint=false];
+
+        subgraph cluster_app_ns_monitoring {
+            label = "Monitoring Namespace";
+
+            "app-grafana-agent" [label="grafana-agent"];
+            "app-tempo" [label="tempo"];
+            "app-grafana-agent" -> "app-tempo";
+
+            "app-prometheus" [label="prometheus"];
+            "app-thanos-sidecar" [label="thanos-sidecar"];
+            "app-thanos-gateway" [label="thanos-gateway"];
+            "app-prometheus" -> "app-thanos-sidecar" -> "app-thanos-gateway";
+
+            "app-alertmanager" [label="alertmanager"];
+            "app-prometheus" -> "app-alertmanager";
+
+            "app-promtail" [label="promtail"];
+        }
+
+        "app-0" -> "app-prometheus";
+        "app-0" -> "app-grafana-agent";
+
+        "app-syslog" -> "app-promtail";
+
+        "app-thanos-sidecar" -> "GCS";
+        "app-tempo" -> "GCS";
+        "app-alertmanager" -> "PagerDuty";
+    }
+
+    subgraph cluster_report {
+        label = "Reporting Cluster";
+        node [style=filled];
+
+        subgraph cluster_report_ns_monitoring {
+            label = "Monitoring Namespace";
+
+            "report-prometheus" [label="prometheus"];
+            "report-thanos-sidecar" [label="thanos-sidecar"];
+            "report-thanos-gateway" [label="thanos-gateway"];
+            "report-prometheus" -> "report-thanos-sidecar" -> "report-thanos-gateway";
+
+            "report-alertmanager" [label="alertmanager"];
+            "report-prometheus" -> "report-alertmanager";
+
+            "report-promtail" [label="promtail"];
+            "report-loki" [label="loki"];
+            "report-promtail" -> "report-loki";
+
+            "report-tempo" [label="tempo"];
+
+            "report-thanos-store" [label="thanos-store"];
+            "report-thanos-querier" [label="thanos-querier"];
+            "report-thanos-gateway" -> "report-thanos-querier";
+            "report-thanos-store" -> "report-thanos-querier";
+
+            "report-thanos-ruler" [label="thanos-ruler"];
+            "report-thanos-querier" -> "report-thanos-ruler" -> "report-alertmanager";
+
+            "report-thanos-compactor" [label="thanos-compactor"];
+
+            "report-grafana" [label="grafana"];
+            "report-loki" -> "report-grafana";
+            "report-tempo" -> "report-grafana";
+            "report-thanos-querier" -> "report-grafana";
+        }
+
+        "app-promtail" -> "report-loki";  // TODO: app-loki forwarder
+        "app-thanos-gateway" -> "report-thanos-querier"; // TODO?
+
+        "report-thanos-sidecar" -> "GCS";
+        "report-loki" -> "GCS"[dir="both"];
+        "report-alertmanager" -> "PagerDuty";
+
+        "GCS" -> "report-tempo";
+        "GCS" -> "report-thanos-store";
+        "GCS" -> "report-thanos-ruler";
+
+        "GCS" -> "report-thanos-compactor"[dir="both"];
+    }
+}

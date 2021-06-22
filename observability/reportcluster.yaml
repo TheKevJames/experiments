@@ -1088,7 +1088,6 @@ spec:
         - '--store=thanos-store-gateway.appcluster-b-monitoring.svc:10901'
         - '--store=thanos-store-gateway.CLUSTER-monitoring.svc:10901'
         - '--store=thanos-store-gateway-longterm.CLUSTER-monitoring.svc:10901'
-        - '--store=thanos-ruler.CLUSTER-monitoring.svc:10901'
         ports:
         - name: thanos-http
           containerPort: 10902

@@ -41,6 +41,9 @@ Finally, you should read through the
 `reporting cluster spec <./reportcluster.yaml>`_, which will handle all the
 aggregation, reporting, and operations side of things.
 
+If you're the type to appreciate a visual reference, you may also want to take
+a look at the `architecture diagram <./architecture.png>`_.
+
 To get an understanding of the useability, you can run ``make``. You'll need
 to have docker running and your ``kubectl`` configured to point to a valid
 cluster. I've not attempted to avoid causing issues with existing clusters;
@@ -86,6 +89,7 @@ TODO
 * logs:
   * examplars?
   * promtail ready probe fix
+  * ruler missing?
 * traces:
   * consider using grafana-agent for prometheus/loki forwarding?
 * metrics:
