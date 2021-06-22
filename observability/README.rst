@@ -87,11 +87,17 @@ TODO
 ----
 
 * logs:
-  * examplars?
+  * examplars?:
+    * https://grafana.com/docs/grafana/latest/datasources/tempo/#trace-to-logs
+    * https://grafana.com/blog/2021/03/31/intro-to-exemplars-which-enable-grafana-tempos-distributed-tracing-at-massive-scale/
   * promtail ready probe fix
   * ruler missing?
+  * logcli integration:
+    * https://grafana.com/docs/loki/latest/getting-started/logcli/ 
 * traces:
   * consider using grafana-agent for prometheus/loki forwarding?
+  * capturing all tags?:
+    * https://grafana.com/blog/2020/11/17/tracing-with-the-grafana-agent-and-grafana-tempo/
 * metrics:
   * investigate value of thanos query frontend
   * figure out grafana v8 ngalerts integration given thanos-query proxy usage

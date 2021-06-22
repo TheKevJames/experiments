@@ -4,6 +4,7 @@ Various Experiments
 This repository is a collection of various one-off experiments.
 
 - `Asyncio HTTP Client Perf`_
+- `Demo Observability Stack`_
 - `Docker Image Size Tests`_
 - `Dockerfiles as Bootable VMs in GCP`_ (see associated
   `blog post <https://thekev.in/blog/2019-08-05-dockerfile-bootable-vm/>`__)
@@ -22,6 +23,7 @@ This repository is a collection of various one-off experiments.
   `blog post <https://thekev.in/blog/2019-06-08-tensorflow-model-optimization/>`__)
 
 .. _Asyncio HTTP Client Perf: https://github.com/TheKevJames/experiments/tree/master/asyncio-http-perf
+.. _Demo Observability Stack: https://github.com/TheKevJames/experiments/tree/master/observability
 .. _Docker Image Size Tests: https://github.com/TheKevJames/experiments/tree/master/docker-size
 .. _Dockerfiles as Bootable VMs in GCP: https://github.com/TheKevJames/experiments/tree/master/gcp-image-from-docker
 .. _Google Pub/Sub Performance Testing: https://github.com/TheKevJames/experiments/tree/master/google-pubsub-perf
