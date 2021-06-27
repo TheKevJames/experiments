@@ -1,0 +1,11 @@
+[package]
+name = "life"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+rand = "0.8.4"
+# https://newbedev.com/cross-compile-a-rust-application-from-linux-to-windows
+# cargo build --target=x86_64-pc-windows-gnu
+# cp ./SDL2.dll target/x86_64-pc-windows-gnu/debug/
+sdl2 = "0.34.5"
