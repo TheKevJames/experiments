@@ -18,31 +18,27 @@ perf.rst: perf.md
 	pandoc -trst --wrap=none $< >$@
 
 perf.md:
-	hyperfine -w3 --export-markdown $@ \
-		'poetry run client aiohttp run --count=1' \
-		'poetry run client aiohttp run --count=10' \
-		'poetry run client aiohttp run --count=100' \
-		'poetry run client aiohttp run --count=100 --batch=10' \
-		'poetry run client aiohttp run --count=100 --batch=100' \
-		'poetry run client aiohttp run --count=1000' \
-		'poetry run client aiohttp run --count=1000 --batch=10' \
-		'poetry run client aiohttp run --count=1000 --batch=100' \
-		'poetry run client asks run --count=1' \
-		'poetry run client asks run --count=10' \
-		'poetry run client asks run --count=100' \
-		'poetry run client asks run --count=100 --batch=10' \
-		'poetry run client asks run --count=100 --batch=100' \
-		'poetry run client asks run --count=1000' \
-		'poetry run client asks run --count=1000 --batch=10' \
-		'poetry run client asks run --count=1000 --batch=100' \
-		'poetry run client httpx run --count=1' \
-		'poetry run client httpx run --count=10' \
-		'poetry run client httpx run --count=100' \
-		'poetry run client httpx run --count=100 --batch=10' \
-		'poetry run client httpx run --count=100 --batch=100' \
-		'poetry run client httpx run --count=1000' \
-		'poetry run client httpx run --count=1000 --batch=10' \
-		'poetry run client httpx run --count=1000 --batch=100'
+	hyperfine -w3 \
+		--show-output \
+		--export-json perf.json \
+		--export-markdown $@ \
+		-L client aiohttp,asks,httpx \
+		'poetry run client {client} run --count=1 --batch=1' \
+		'poetry run client {client} run --count=10 --batch=1' \
+		'poetry run client {client} run --count=10 --batch=10' \
+		'poetry run client {client} run --count=100 --batch=1' \
+		'poetry run client {client} run --count=100 --batch=10' \
+		'poetry run client {client} run --count=100 --batch=100' \
+		'poetry run client {client} run --count=1000 --batch=1' \
+		'poetry run client {client} run --count=1000 --batch=10' \
+		'poetry run client {client} run --count=1000 --batch=100' \
+		'poetry run client {client} run --count=1000 --batch=100'
+
+# TODO:
+# hub clone sharkdp/hyperfine ...
+# modify (non-float)
+# perf.png: perf.json
+# 	python hyperfine/scripts/plot_parametrized.py -o perf.png perf.json
 
 bench: clean perf.md
 
