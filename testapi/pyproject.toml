@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "testapi"
+version = "0.0.0"
+description = ""
+
+repository = ""
+authors = ["Kevin James <KevinJames@thekev.in>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.7,<4.0"
+fastapi = "0.75.0"
+httptools = "0.4.0"
+uvicorn = "0.17.6"
+uvloop = "0.16.0"
+
+[tool.poetry.dev-dependencies]
+httpx = "0.22.0"
+pytest = "7.1.1"
+pytest-asyncio = "0.18.2"
+watchgod = "0.8.1"  # poetry run uvicorn testapi.app:app --reload
+
+[tool.pytest.ini_options]
+addopts = "-Werror"
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
