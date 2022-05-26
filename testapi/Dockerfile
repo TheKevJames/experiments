@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-FROM python:3.7.13-slim AS base
+FROM python:3.10.4-slim AS base
 
 RUN apt-get update -qy && \
     apt-get install -qy \
