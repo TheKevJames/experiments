@@ -1,10 +1,8 @@
 {
   "extends": ["github>thekevjames/tools:personal"],
+  "enabled": false,
   "packageRules": [{
     "paths": [".circleci/*", ".pre-commit-config.yaml"],
     "enabled": true
-  }, {
-    "paths": ["asyncio-http-perf/*", "docker-size/**/*", "google-pubsub-oneoff/*", "google-pubsub-perf/*", "kms-auth/*", "tensorflow-perf/**/*"],
-    "enabled": false
   }]
 }
