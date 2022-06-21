@@ -1,4 +1,4 @@
 https://manage.fury.io/2/indexes/python/thekevjames/download/tensorflow-1.13.1-cp37-cp37m-linux_x86_64.whl
 matplotlib
-numpy==1.16.4
+numpy==1.22.0
 py-spy
