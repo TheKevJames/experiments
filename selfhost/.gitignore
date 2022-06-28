@@ -1,0 +1,8 @@
+hass/*.db
+hass/*.db-shm
+hass/*.db-wal
+hass/*.log
+hass/*.log.*
+hass/.storage/*
+hass/known_devices.yaml
+hass/secrets.yaml

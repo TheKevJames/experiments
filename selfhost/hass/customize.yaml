@@ -1,0 +1,15 @@
+device_tracker.dialbox:
+  friendly_name: dialbox
+  icon: mdi:laptop
+device_tracker.extender:
+  friendly_name: Huawei OptiXstar
+  icon: mdi:router-wireless
+device_tracker.pi0:
+  friendly_name: pi-0
+  icon: mdi:server
+device_tracker.pixelpad:
+  friendly_name: pixelpad
+  icon: mdi:cellphone
+
+person.kevin:
+  entity_picture: https://gravatar.com/avatar/ba8ec5ac9fe95bb410bda4416aba08c8.jpg
