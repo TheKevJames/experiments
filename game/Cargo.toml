@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
+log = "0.4"
+pretty_env_logger = "0.4"
 rand = "0.8.5"
 # Windows:
 # https://newbedev.com/cross-compile-a-rust-application-from-linux-to-windows
