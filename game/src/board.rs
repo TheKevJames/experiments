@@ -63,6 +63,19 @@ impl Board {
         }
     }
 
+    pub fn click(self, x: usize, y: usize) -> Board {
+        let col = x / Board::CELL_SIZE;
+        let row = y / Board::CELL_SIZE;
+
+        let mut v = self.state;
+        v[row][col] = true;
+        Board {
+            state: v,
+            height: self.height,
+            width: self.width,
+        }
+    }
+
     pub fn tick(&self) -> Board {
         let mut v: Vec<Vec<bool>> = Vec::new();
 

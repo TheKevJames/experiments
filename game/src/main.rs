@@ -8,20 +8,21 @@ mod utils;
 
 use std::time::Duration;
 
-use log::{debug,info};
+use log::debug;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::mouse::MouseButton;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::EventPump;
 use sdl2::Sdl;
 
-fn init(height: u32, width: u32) -> (Sdl, Canvas<Window>, EventPump) {
+fn init(height: u32, width: u32) -> (Canvas<Window>, EventPump) {
     let context = sdl2::init().unwrap();
     let video = context.video().unwrap();
 
     let window = video
-        .window("life", width, height)
+        .window("game", width, height)
         .position_centered()
         .opengl()
         .build()
@@ -30,7 +31,7 @@ fn init(height: u32, width: u32) -> (Sdl, Canvas<Window>, EventPump) {
     let canvas = window.into_canvas().build().unwrap();
     let event_pump = context.event_pump().unwrap();
 
-    (context, canvas, event_pump)
+    (canvas, event_pump)
 }
 
 fn main() {
@@ -38,7 +39,7 @@ fn main() {
 
     let height: u32 = 600;
     let width: u32 = 400;
-    let (context, mut canvas, mut event_pump) = init(height, width);
+    let (mut canvas, mut event_pump) = init(height, width);
 
     let mut board = board::Board::new(height as usize, width as usize);
 
@@ -50,8 +51,19 @@ fn main() {
                     keycode: Some(Keycode::Q),
                     ..
                 } => break 'running,
+                Event::MouseMotion { .. } => {}
+                Event::MouseButtonDown { .. } => {}
+                Event::MouseButtonUp {
+                    mouse_btn: MouseButton::Left,
+                    x,
+                    y,
+                    ..
+                } => {
+                    board = board.click(x as usize, y as usize);
+                }
+                Event::Window { .. } => {}
                 _ => {
-                    info!("Unhandled keypress: {:?}", event);
+                    debug!("Unhandled keypress: {:?}", event);
                 }
             }
         }
@@ -60,9 +72,5 @@ fn main() {
         board = board.tick();
 
         ::std::thread::sleep(Duration::from_millis(50));
-
-        let focused = context.keyboard().focused_window_id().is_some();
-        debug!("{:?}", focused);
-        // TODO: why no kepresses captured when focused?
     }
 }
