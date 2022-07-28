@@ -12,18 +12,49 @@ use sdl2::video::Window;
 
 pub struct Terrain {
     color: Color,
+    _label: &'static str,
     height: f64,
 }
 
-const REGIONS: [Terrain; 2] = [
+const REGIONS: [Terrain; 8] = [
     Terrain {
-        color: Color::RGB(67, 115, 208),
-        // label: "water",
+        color: Color::RGB(0, 71, 171),
+        _label: "deep water",
+        height: 0.3,
+    },
+    Terrain {
+        color: Color::RGB(100, 149, 237),
+        _label: "shallow water",
         height: 0.4,
     },
     Terrain {
-        color: Color::RGB(86, 152, 23),
-        // label: "land",
+        color: Color::RGB(194, 178, 128),
+        _label: "sand",
+        height: 0.45,
+    },
+    Terrain {
+        color: Color::RGB(126, 200, 80),
+        _label: "grass",
+        height: 0.55,
+    },
+    Terrain {
+        color: Color::RGB(1, 68, 33),
+        _label: "forest",
+        height: 0.6,
+    },
+    Terrain {
+        color: Color::RGB(105, 70, 5),
+        _label: "rock",
+        height: 0.7,
+    },
+    Terrain {
+        color: Color::RGB(75, 44, 13),
+        _label: "mountain",
+        height: 0.9,
+    },
+    Terrain {
+        color: Color::RGB(255, 255, 255),
+        _label: "snow",
         height: 1.0,
     },
 ];
