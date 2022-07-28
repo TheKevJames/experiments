@@ -109,7 +109,6 @@ impl Map {
     }
 
     pub fn render(&self, c: &mut Canvas<Window>, x: usize, y: usize) {
-        // TODO: the x/y offset is probably a bad method -- can I nest Canvas's?
         let x_offset = x / Map::CELL_SIZE;
         let y_offset = y / Map::CELL_SIZE;
 
@@ -173,16 +172,36 @@ pub struct Menu {
 }
 
 impl Menu {
+    const BG_COLOR: Color = Color::RGB(50, 50, 50);
+    const FG_COLOR: Color = Color::RGB(200, 200, 200);
+
+    const BUTTON_WIDTH: u32 = 150;
+
     pub fn new(height: usize, width: usize) -> Menu {
         Menu {
             height: height,
             width: width,
         }
     }
+
+    pub fn render(&self, c: &mut Canvas<Window>, x: usize, y: usize) {
+        c.set_draw_color(Menu::BG_COLOR);
+        c.clear();
+
+        c.set_draw_color(Menu::FG_COLOR);
+        c.fill_rect(Rect::new(
+            (0 + x) as i32,
+            (0 + y) as i32,
+            Menu::BUTTON_WIDTH,
+            self.height as u32,
+        ))
+        .unwrap();
+    }
 }
 
 pub struct Board {
     map: Map,
+    menu: Menu,
     rng: StdRng,
     height: usize,
     width: usize,
@@ -192,11 +211,12 @@ impl Board {
     pub fn new(height: usize, width: usize, seed: String) -> Board {
         let mut rng: StdRng = Seeder::from(seed).make_rng();
 
-        let menu = Menu::new(100, width);
-        let map = Map::new(height - 100, width, &mut rng);
+        let menu = Menu::new(50, width);
+        let map = Map::new(height - 50, width, &mut rng);
 
         Board {
             map: map,
+            menu: menu,
             rng: rng,
             height: height,
             width: width,
@@ -216,6 +236,8 @@ impl Board {
     }
 
     pub fn render(&self, c: &mut Canvas<Window>) {
-        self.map.render(c, 0, 100);
+        // TODO: the x/y offset is probably a bad method -- can I nest Canvas's?
+        self.menu.render(c, 0, 0);
+        self.map.render(c, 0, 50);
     }
 }
