@@ -56,7 +56,7 @@ fn main() {
                     keycode: Some(Keycode::R),
                     ..
                 } => {
-                    board = board.init_bg();
+                    board.randomize_bg();
                 }
                 Event::MouseMotion { .. } => {}
                 Event::MouseButtonDown { .. } => {}
@@ -66,7 +66,7 @@ fn main() {
                     y,
                     ..
                 } => {
-                    board = board.click(x as usize, y as usize);
+                    board.click(x as usize, y as usize);
                 }
                 Event::Window { .. } => {}
                 _ => {
@@ -76,7 +76,7 @@ fn main() {
         }
 
         board.render(&mut canvas);
-        board = board.tick();
+        board.tick();
 
         ::std::thread::sleep(Duration::from_millis(50));
     }

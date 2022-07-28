@@ -27,22 +27,20 @@ const REGIONS: [Terrain; 2] = [
     },
 ];
 
-pub struct Board {
+pub struct Map {
     bg: Vec<Vec<f64>>,
     state: Vec<Vec<bool>>,
     height: usize,
     width: usize,
 }
 
-impl Board {
+impl Map {
     const CELL_COLOR: Color = Color::RGB(0, 0, 0);
     const CELL_SIZE: usize = 10;
 
-    pub fn new(height: usize, width: usize, seed: String) -> Board {
-        let mut rng: StdRng = Seeder::from(seed).make_rng();
-
-        let cols = width / Board::CELL_SIZE;
-        let rows = height / Board::CELL_SIZE;
+    pub fn new(height: usize, width: usize, rng: &mut StdRng) -> Map {
+        let cols = width / Map::CELL_SIZE;
+        let rows = height / Map::CELL_SIZE;
 
         let bg = procedural::generate_map(height, width, rng.gen(), 25.0, 4, 0.5, 2.0);
 
@@ -54,7 +52,7 @@ impl Board {
             }
         }
 
-        Board {
+        Map {
             bg: bg,
             state: v,
             height: rows,
@@ -86,45 +84,25 @@ impl Board {
         }
     }
 
-    pub fn init_bg(&self) -> Board {
-        let mut rng: StdRng = Seeder::from("zebra").make_rng();
-        let bg = procedural::generate_map(self.height, self.width, rng.gen(), 25.0, 4, 0.5, 2.0);
+    pub fn click(&self, x: usize, y: usize) -> Map {
+        let col = x / Map::CELL_SIZE;
+        let row = y / Map::CELL_SIZE;
 
-        Board {
-            bg: bg,
-            state: self.state.to_vec(),
-            height: self.height,
-            width: self.width,
-        }
-    }
-
-    pub fn click(self, x: usize, y: usize) -> Board {
-        let col = x / Board::CELL_SIZE;
-        let row = y / Board::CELL_SIZE;
-
-        let mut v = self.state;
+        let mut v = self.state.to_vec();
         v[row][col] = true;
-        Board {
-            bg: self.bg,
-            state: v,
-            height: self.height,
-            width: self.width,
-        }
-    }
-
-    pub fn tick(&self) -> Board {
-        let mut v: Vec<Vec<bool>> = Vec::new();
-
-        for i in 0..self.height {
-            v.push(Vec::new());
-            for j in 0..self.width {
-                v[i].push(self.tick_cell(i, j));
-            }
-        }
-
-        Board {
+        Map {
             bg: self.bg.to_vec(),
             state: v,
+            height: self.height,
+            width: self.width,
+        }
+    }
+
+    pub fn randomize_bg(&self, seed: u32) -> Map {
+        let bg = procedural::generate_map(self.height, self.width, seed, 25.0, 4, 0.5, 2.0);
+        Map {
+            bg: bg,
+            state: self.state.to_vec(),
             height: self.height,
             width: self.width,
         }
@@ -134,12 +112,12 @@ impl Board {
         for i in 0..self.height {
             for j in 0..self.width {
                 if self.state[i][j] {
-                    c.set_draw_color(Board::CELL_COLOR);
+                    c.set_draw_color(Map::CELL_COLOR);
                     c.fill_rect(Rect::new(
-                        (j * Board::CELL_SIZE) as i32,
-                        (i * Board::CELL_SIZE) as i32,
-                        Board::CELL_SIZE as u32,
-                        Board::CELL_SIZE as u32,
+                        (j * Map::CELL_SIZE) as i32,
+                        (i * Map::CELL_SIZE) as i32,
+                        Map::CELL_SIZE as u32,
+                        Map::CELL_SIZE as u32,
                     ))
                     .unwrap();
                     continue;
@@ -155,15 +133,70 @@ impl Board {
                 // let value = (190.0 + offset) as u8;
                 // c.set_draw_color(Color::RGB(value, value, value));
                 c.fill_rect(Rect::new(
-                    (j * Board::CELL_SIZE) as i32,
-                    (i * Board::CELL_SIZE) as i32,
-                    Board::CELL_SIZE as u32,
-                    Board::CELL_SIZE as u32,
+                    (j * Map::CELL_SIZE) as i32,
+                    (i * Map::CELL_SIZE) as i32,
+                    Map::CELL_SIZE as u32,
+                    Map::CELL_SIZE as u32,
                 ))
                 .unwrap();
             }
         }
 
         c.present();
+    }
+
+    pub fn tick(&self) -> Map {
+        let mut v: Vec<Vec<bool>> = Vec::new();
+        for i in 0..self.height {
+            v.push(Vec::new());
+            for j in 0..self.width {
+                v[i].push(self.tick_cell(i, j));
+            }
+        }
+
+        Map {
+            bg: self.bg.to_vec(),
+            state: v,
+            height: self.height,
+            width: self.width,
+        }
+    }
+}
+
+pub struct Board {
+    map: Map,
+    rng: StdRng,
+    height: usize,
+    width: usize,
+}
+
+impl Board {
+    pub fn new(height: usize, width: usize, seed: String) -> Board {
+        let mut rng: StdRng = Seeder::from(seed).make_rng();
+
+        let map = Map::new(height, width, &mut rng);
+
+        Board {
+            map: map,
+            rng: rng,
+            height: height,
+            width: width,
+        }
+    }
+
+    pub fn click(&mut self, x: usize, y: usize) {
+        self.map = self.map.click(x, y);
+    }
+
+    pub fn tick(&mut self) {
+        self.map = self.map.tick();
+    }
+
+    pub fn randomize_bg(&mut self) {
+        self.map = self.map.randomize_bg(self.rng.gen());
+    }
+
+    pub fn render(&self, c: &mut Canvas<Window>) {
+        self.map.render(c);
     }
 }
