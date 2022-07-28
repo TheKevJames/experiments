@@ -21,8 +21,8 @@ pub fn generate_map(
 ) -> Vec<Vec<f64>> {
     let perlin = Perlin::new().set_seed(seed);
 
-    let mut min = std::f64::MAX;
-    let mut max = std::f64::MIN;
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
 
     let mut v: Vec<Vec<f64>> = Vec::new();
     for i in 0..height {

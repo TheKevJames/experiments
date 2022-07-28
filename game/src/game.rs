@@ -159,8 +159,7 @@ impl Map {
                 }
 
                 if draw_perlin {
-                    let offset = self.bg[i][j] * 64.0;
-                    let value = (190.0 + offset) as u8;
+                    let value = (self.bg[i][j] * 200.0) as u8;
                     c.set_draw_color(Color::RGB(value, value, value));
                 } else {
                     for region in REGIONS {
@@ -228,7 +227,7 @@ impl Game {
         if y < 50 {
             self.menu.click(x, y);
         } else {
-            self.map = self.map.click(x, y);
+            self.map = self.map.click(x, y - 50);
         }
 
         if self.menu.buttons[1].active {
