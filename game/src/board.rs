@@ -1,7 +1,9 @@
 use crate::procedural;
 use crate::utils;
 
+use rand::rngs::StdRng;
 use rand::Rng;
+use rand_seeder::Seeder;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
@@ -18,11 +20,13 @@ impl Board {
     const CELL_COLOR: Color = Color::RGB(0, 0, 0);
     const CELL_SIZE: usize = 10;
 
-    pub fn new(height: usize, width: usize) -> Board {
-        let mut rng = rand::thread_rng();
+    pub fn new(height: usize, width: usize, seed: String) -> Board {
+        let mut rng: StdRng = Seeder::from(seed).make_rng();
 
         let cols = width / Board::CELL_SIZE;
         let rows = height / Board::CELL_SIZE;
+
+        let bg = procedural::generate_map(height, width, rng.gen(), 25.0, 4, 0.5, 2.0);
 
         let mut v: Vec<Vec<bool>> = Vec::new();
         for i in 0..rows {
@@ -31,8 +35,6 @@ impl Board {
                 v[i].push(rng.gen());
             }
         }
-
-        let bg = procedural::generate_map(height, width, 1.23);
 
         Board {
             bg: bg,
@@ -110,9 +112,8 @@ impl Board {
                         Board::CELL_SIZE as u32,
                     ))
                     .unwrap();
-                    continue
+                    continue;
                 }
-
 
                 let offset = self.bg[i][j] * 64.0;
                 let value = (190.0 + offset) as u8;

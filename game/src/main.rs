@@ -41,7 +41,8 @@ fn main() {
     let width: u32 = 820;
     let (mut canvas, mut event_pump) = init(height, width);
 
-    let mut board = board::Board::new(height as usize, width as usize);
+    let seed = String::from("prng seed");
+    let mut board = board::Board::new(height as usize, width as usize, seed);
 
     'running: loop {
         for event in event_pump.poll_iter() {
