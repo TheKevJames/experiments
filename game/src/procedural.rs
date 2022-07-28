@@ -2,6 +2,14 @@ use noise::NoiseFn;
 use noise::Perlin;
 use noise::Seedable;
 
+// fn lerp(min: f64, max: f64, fraction: f64) -> f64 {
+//     min + fraction * (max - min)
+// }
+
+fn inverse_lerp(min: f64, max: f64, value: f64) -> f64 {
+    (value - min) / (max - min)
+}
+
 pub fn generate_map(
     height: usize,
     width: usize,
@@ -12,6 +20,9 @@ pub fn generate_map(
     lacunarity: f64,
 ) -> Vec<Vec<f64>> {
     let perlin = Perlin::new().set_seed(seed);
+
+    let mut min = std::f64::MAX;
+    let mut max = std::f64::MIN;
 
     let mut v: Vec<Vec<f64>> = Vec::new();
     for i in 0..height {
@@ -30,7 +41,20 @@ pub fn generate_map(
                 frequency *= lacunarity;
             }
             v[i].push(depth);
+
+            if depth < min {
+                min = depth;
+            } else if depth > max {
+                max = depth;
+            }
         }
     }
+
+    for i in 0..height {
+        for j in 0..width {
+            v[i][j] = inverse_lerp(min, max, v[i][j]);
+        }
+    }
+
     v
 }
