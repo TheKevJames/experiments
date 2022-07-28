@@ -144,8 +144,6 @@ impl Map {
                 .unwrap();
             }
         }
-
-        c.present();
     }
 
     pub fn tick(&self) -> Map {
@@ -189,13 +187,29 @@ impl Menu {
         c.clear();
 
         c.set_draw_color(Menu::FG_COLOR);
-        c.fill_rect(Rect::new(
+        let btn1 = Rect::new(
             (0 + x) as i32,
             (0 + y) as i32,
             Menu::BUTTON_WIDTH,
             self.height as u32,
-        ))
-        .unwrap();
+        );
+        c.fill_rect(btn1).unwrap();
+
+        let ttf_context = sdl2::ttf::init().unwrap();
+        let texture_creator = c.texture_creator();
+
+        let mut font = ttf_context.load_font("assets/arial.ttf", 128).unwrap();
+        font.set_style(sdl2::ttf::FontStyle::BOLD);
+
+        let surface = font
+            .render("Button 1")
+            .blended(Color::RGB(255, 0, 0))
+            .unwrap();
+        let texture = texture_creator
+            .create_texture_from_surface(&surface)
+            .unwrap();
+
+        c.copy(&texture, None, Some(btn1)).unwrap();
     }
 }
 
@@ -239,5 +253,7 @@ impl Board {
         // TODO: the x/y offset is probably a bad method -- can I nest Canvas's?
         self.menu.render(c, 0, 0);
         self.map.render(c, 0, 50);
+
+        c.present();
     }
 }

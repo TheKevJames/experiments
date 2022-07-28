@@ -9,13 +9,20 @@ noise = "0.7"
 pretty_env_logger = "0.4"
 rand = "0.8.5"
 rand_seeder = "0.2.3"
+
+[dependencies.sdl2]
 # Windows:
 # https://newbedev.com/cross-compile-a-rust-application-from-linux-to-windows
 # cargo build --target=x86_64-pc-windows-gnu
 # cp ./SDL2.dll target/x86_64-pc-windows-gnu/debug/
+
 # Linux:
 # apt install libsdl2-dev
+
 # OSX:
-# port install libsdl2
+# port install libsdl2 libsdl2_ttf
 # export LIBRARY_PATH="$LIBRARY_PATH:/opt/local/lib/"
-sdl2 = "0.35.2"
+
+version = "0.35.2"
+default-features = false
+features = ["ttf"]
