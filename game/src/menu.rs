@@ -4,20 +4,27 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 pub struct Button {
+    active: bool,
     label: &'static str,
     height: usize,
 }
 
 impl Button {
     const BG_COLOR: Color = Color::RGB(200, 200, 200);
-    const FG_COLOR: Color = Color::RGB(255, 0, 0);
+    const FG_COLOR_INACTIVE: Color = Color::RGB(255, 0, 0);
+    const FG_COLOR_ACTIVE: Color = Color::RGB(0, 255, 0);
     const WIDTH: usize = 150;
 
     pub fn new(label: &'static str, height: usize) -> Button {
         Button {
+            active: false,
             label: label,
             height: height,
         }
+    }
+
+    pub fn click(&mut self) {
+        self.active = !self.active;
     }
 
     pub fn render(&self, c: &mut Canvas<Window>, x: i32, y: i32) {
@@ -31,7 +38,12 @@ impl Button {
         let mut font = ttf_context.load_font("assets/arial.ttf", 128).unwrap();
         font.set_style(sdl2::ttf::FontStyle::BOLD);
 
-        let surface = font.render(self.label).blended(Button::FG_COLOR).unwrap();
+        let color = if self.active {
+            Button::FG_COLOR_ACTIVE
+        } else {
+            Button::FG_COLOR_INACTIVE
+        };
+        let surface = font.render(self.label).blended(color).unwrap();
         let texture = texture_creator
             .create_texture_from_surface(&surface)
             .unwrap();
@@ -58,6 +70,14 @@ impl Menu {
             buttons: buttons,
             height: height,
             width: width,
+        }
+    }
+
+    pub fn click(&mut self, x: usize, y: usize) {
+        if x < Button::WIDTH {
+            self.buttons[0].click();
+        } else if x < 2 * Button::WIDTH {
+            self.buttons[1].click();
         }
     }
 

@@ -3,7 +3,7 @@ extern crate pretty_env_logger;
 extern crate rand;
 extern crate sdl2;
 
-mod board;
+mod game;
 mod menu;
 mod procedural;
 mod utils;
@@ -43,7 +43,7 @@ fn main() {
     let (mut canvas, mut event_pump) = init(height, width);
 
     let seed = String::from("prng seed");
-    let mut board = board::Board::new(height as usize, width as usize, seed);
+    let mut game = game::Game::new(height as usize, width as usize, seed);
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -57,7 +57,7 @@ fn main() {
                     keycode: Some(Keycode::R),
                     ..
                 } => {
-                    board.randomize_bg();
+                    game.randomize_bg();
                 }
                 Event::MouseMotion { .. } => {}
                 Event::MouseButtonDown { .. } => {}
@@ -67,7 +67,8 @@ fn main() {
                     y,
                     ..
                 } => {
-                    board.click(x as usize, y as usize);
+                    // TODO: require MouseButtonDown and MouseButtonUp in same button
+                    game.click(x as usize, y as usize);
                 }
                 Event::Window { .. } => {}
                 _ => {
@@ -76,8 +77,8 @@ fn main() {
             }
         }
 
-        board.render(&mut canvas);
-        board.tick();
+        game.render(&mut canvas);
+        game.tick();
 
         ::std::thread::sleep(Duration::from_millis(50));
     }

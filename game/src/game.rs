@@ -165,7 +165,7 @@ impl Map {
     }
 }
 
-pub struct Board {
+pub struct Game {
     map: Map,
     menu: menu::Menu,
     rng: StdRng,
@@ -173,14 +173,14 @@ pub struct Board {
     width: usize,
 }
 
-impl Board {
-    pub fn new(height: usize, width: usize, seed: String) -> Board {
+impl Game {
+    pub fn new(height: usize, width: usize, seed: String) -> Game {
         let mut rng: StdRng = Seeder::from(seed).make_rng();
 
         let menu = menu::Menu::new(50, width);
         let map = Map::new(height - 50, width, &mut rng);
 
-        Board {
+        Game {
             map: map,
             menu: menu,
             rng: rng,
@@ -190,7 +190,11 @@ impl Board {
     }
 
     pub fn click(&mut self, x: usize, y: usize) {
-        self.map = self.map.click(x, y);
+        if y < 50 {
+            self.menu.click(x, y);
+        } else {
+            self.map = self.map.click(x, y);
+        }
     }
 
     pub fn tick(&mut self) {
