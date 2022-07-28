@@ -4,6 +4,7 @@ extern crate rand;
 extern crate sdl2;
 
 mod board;
+mod procedural;
 mod utils;
 
 use std::time::Duration;
@@ -15,7 +16,6 @@ use sdl2::mouse::MouseButton;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::EventPump;
-use sdl2::Sdl;
 
 fn init(height: u32, width: u32) -> (Canvas<Window>, EventPump) {
     let context = sdl2::init().unwrap();
@@ -37,8 +37,8 @@ fn init(height: u32, width: u32) -> (Canvas<Window>, EventPump) {
 fn main() {
     pretty_env_logger::init();
 
-    let height: u32 = 600;
-    let width: u32 = 400;
+    let height: u32 = 1080;
+    let width: u32 = 820;
     let (mut canvas, mut event_pump) = init(height, width);
 
     let mut board = board::Board::new(height as usize, width as usize);

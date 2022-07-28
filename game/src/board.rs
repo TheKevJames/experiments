@@ -1,3 +1,4 @@
+use crate::procedural;
 use crate::utils;
 
 use rand::Rng;
@@ -7,16 +8,15 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 pub struct Board {
+    bg: Vec<Vec<f64>>,
     state: Vec<Vec<bool>>,
     height: usize,
     width: usize,
 }
 
 impl Board {
-    const BG_COLOR: Color = Color::RGB(255, 255, 255);
-
     const CELL_COLOR: Color = Color::RGB(0, 0, 0);
-    const CELL_SIZE: usize = 5;
+    const CELL_SIZE: usize = 10;
 
     pub fn new(height: usize, width: usize) -> Board {
         let mut rng = rand::thread_rng();
@@ -32,7 +32,10 @@ impl Board {
             }
         }
 
+        let bg = procedural::generate_map(height, width, 1.23);
+
         Board {
+            bg: bg,
             state: v,
             height: rows,
             width: cols,
@@ -70,6 +73,7 @@ impl Board {
         let mut v = self.state;
         v[row][col] = true;
         Board {
+            bg: self.bg,
             state: v,
             height: self.height,
             width: self.width,
@@ -87,6 +91,7 @@ impl Board {
         }
 
         Board {
+            bg: self.bg.to_vec(),
             state: v,
             height: self.height,
             width: self.width,
@@ -94,13 +99,10 @@ impl Board {
     }
 
     pub fn render(&self, c: &mut Canvas<Window>) {
-        c.set_draw_color(Board::BG_COLOR);
-        c.clear();
-
-        c.set_draw_color(Board::CELL_COLOR);
         for i in 0..self.height {
             for j in 0..self.width {
                 if self.state[i][j] {
+                    c.set_draw_color(Board::CELL_COLOR);
                     c.fill_rect(Rect::new(
                         (j * Board::CELL_SIZE) as i32,
                         (i * Board::CELL_SIZE) as i32,
@@ -108,7 +110,20 @@ impl Board {
                         Board::CELL_SIZE as u32,
                     ))
                     .unwrap();
+                    continue
                 }
+
+
+                let offset = self.bg[i][j] * 64.0;
+                let value = (190.0 + offset) as u8;
+                c.set_draw_color(Color::RGB(value, value, value));
+                c.fill_rect(Rect::new(
+                    (j * Board::CELL_SIZE) as i32,
+                    (i * Board::CELL_SIZE) as i32,
+                    Board::CELL_SIZE as u32,
+                    Board::CELL_SIZE as u32,
+                ))
+                .unwrap();
             }
         }
 
