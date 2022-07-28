@@ -108,14 +108,18 @@ impl Map {
         }
     }
 
-    pub fn render(&self, c: &mut Canvas<Window>) {
+    pub fn render(&self, c: &mut Canvas<Window>, x: usize, y: usize) {
+        // TODO: the x/y offset is probably a bad method -- can I nest Canvas's?
+        let x_offset = x / Map::CELL_SIZE;
+        let y_offset = y / Map::CELL_SIZE;
+
         for i in 0..self.height {
             for j in 0..self.width {
                 if self.state[i][j] {
                     c.set_draw_color(Map::CELL_COLOR);
                     c.fill_rect(Rect::new(
-                        (j * Map::CELL_SIZE) as i32,
-                        (i * Map::CELL_SIZE) as i32,
+                        ((j + x_offset) * Map::CELL_SIZE) as i32,
+                        ((i + y_offset) * Map::CELL_SIZE) as i32,
                         Map::CELL_SIZE as u32,
                         Map::CELL_SIZE as u32,
                     ))
@@ -133,8 +137,8 @@ impl Map {
                 // let value = (190.0 + offset) as u8;
                 // c.set_draw_color(Color::RGB(value, value, value));
                 c.fill_rect(Rect::new(
-                    (j * Map::CELL_SIZE) as i32,
-                    (i * Map::CELL_SIZE) as i32,
+                    ((j + x_offset) * Map::CELL_SIZE) as i32,
+                    ((i + y_offset) * Map::CELL_SIZE) as i32,
                     Map::CELL_SIZE as u32,
                     Map::CELL_SIZE as u32,
                 ))
@@ -163,6 +167,20 @@ impl Map {
     }
 }
 
+pub struct Menu {
+    height: usize,
+    width: usize,
+}
+
+impl Menu {
+    pub fn new(height: usize, width: usize) -> Menu {
+        Menu {
+            height: height,
+            width: width,
+        }
+    }
+}
+
 pub struct Board {
     map: Map,
     rng: StdRng,
@@ -174,7 +192,8 @@ impl Board {
     pub fn new(height: usize, width: usize, seed: String) -> Board {
         let mut rng: StdRng = Seeder::from(seed).make_rng();
 
-        let map = Map::new(height, width, &mut rng);
+        let menu = Menu::new(100, width);
+        let map = Map::new(height - 100, width, &mut rng);
 
         Board {
             map: map,
@@ -197,6 +216,6 @@ impl Board {
     }
 
     pub fn render(&self, c: &mut Canvas<Window>) {
-        self.map.render(c);
+        self.map.render(c, 0, 100);
     }
 }
