@@ -1,3 +1,4 @@
+use crate::menu;
 use crate::procedural;
 use crate::utils;
 
@@ -164,58 +165,9 @@ impl Map {
     }
 }
 
-pub struct Menu {
-    height: usize,
-    width: usize,
-}
-
-impl Menu {
-    const BG_COLOR: Color = Color::RGB(50, 50, 50);
-    const FG_COLOR: Color = Color::RGB(200, 200, 200);
-
-    const BUTTON_WIDTH: u32 = 150;
-
-    pub fn new(height: usize, width: usize) -> Menu {
-        Menu {
-            height: height,
-            width: width,
-        }
-    }
-
-    pub fn render(&self, c: &mut Canvas<Window>, x: usize, y: usize) {
-        c.set_draw_color(Menu::BG_COLOR);
-        c.clear();
-
-        c.set_draw_color(Menu::FG_COLOR);
-        let btn1 = Rect::new(
-            (0 + x) as i32,
-            (0 + y) as i32,
-            Menu::BUTTON_WIDTH,
-            self.height as u32,
-        );
-        c.fill_rect(btn1).unwrap();
-
-        let ttf_context = sdl2::ttf::init().unwrap();
-        let texture_creator = c.texture_creator();
-
-        let mut font = ttf_context.load_font("assets/arial.ttf", 128).unwrap();
-        font.set_style(sdl2::ttf::FontStyle::BOLD);
-
-        let surface = font
-            .render("Button 1")
-            .blended(Color::RGB(255, 0, 0))
-            .unwrap();
-        let texture = texture_creator
-            .create_texture_from_surface(&surface)
-            .unwrap();
-
-        c.copy(&texture, None, Some(btn1)).unwrap();
-    }
-}
-
 pub struct Board {
     map: Map,
-    menu: Menu,
+    menu: menu::Menu,
     rng: StdRng,
     height: usize,
     width: usize,
@@ -225,7 +177,7 @@ impl Board {
     pub fn new(height: usize, width: usize, seed: String) -> Board {
         let mut rng: StdRng = Seeder::from(seed).make_rng();
 
-        let menu = Menu::new(50, width);
+        let menu = menu::Menu::new(50, width);
         let map = Map::new(height - 50, width, &mut rng);
 
         Board {
@@ -251,6 +203,8 @@ impl Board {
 
     pub fn render(&self, c: &mut Canvas<Window>) {
         // TODO: the x/y offset is probably a bad method -- can I nest Canvas's?
+
+        // TODO: clear before renders?
         self.menu.render(c, 0, 0);
         self.map.render(c, 0, 50);
 

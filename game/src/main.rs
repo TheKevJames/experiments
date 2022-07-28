@@ -4,6 +4,7 @@ extern crate rand;
 extern crate sdl2;
 
 mod board;
+mod menu;
 mod procedural;
 mod utils;
 
