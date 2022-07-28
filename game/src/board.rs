@@ -68,6 +68,18 @@ impl Board {
         }
     }
 
+    pub fn init_bg(&self) -> Board {
+        let mut rng: StdRng = Seeder::from("zebra").make_rng();
+        let bg = procedural::generate_map(self.height, self.width, rng.gen(), 25.0, 4, 0.5, 2.0);
+
+        Board {
+            bg: bg,
+            state: self.state.to_vec(),
+            height: self.height,
+            width: self.width,
+        }
+    }
+
     pub fn click(self, x: usize, y: usize) -> Board {
         let col = x / Board::CELL_SIZE;
         let row = y / Board::CELL_SIZE;

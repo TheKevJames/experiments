@@ -52,6 +52,12 @@ fn main() {
                     keycode: Some(Keycode::Q),
                     ..
                 } => break 'running,
+                Event::KeyDown {
+                    keycode: Some(Keycode::R),
+                    ..
+                } => {
+                    board = board.init_bg();
+                }
                 Event::MouseMotion { .. } => {}
                 Event::MouseButtonDown { .. } => {}
                 Event::MouseButtonUp {

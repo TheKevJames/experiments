@@ -11,8 +11,7 @@ pub fn generate_map(
     persistence: f64,
     lacunarity: f64,
 ) -> Vec<Vec<f64>> {
-    let perlin = Perlin::new();
-    perlin.set_seed(seed);
+    let perlin = Perlin::new().set_seed(seed);
 
     let mut v: Vec<Vec<f64>> = Vec::new();
     for i in 0..height {
@@ -25,8 +24,7 @@ pub fn generate_map(
                 let x = i as f64 * frequency / scale;
                 let y = j as f64 * frequency / scale;
 
-                let value = perlin.get([x, y]);
-                depth += value * amplitude;
+                depth += perlin.get([x, y]) * amplitude;
 
                 amplitude *= persistence;
                 frequency *= lacunarity;
