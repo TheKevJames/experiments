@@ -9,6 +9,24 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
+pub struct Terrain {
+    color: Color,
+    height: f64,
+}
+
+const REGIONS: [Terrain; 2] = [
+    Terrain {
+        color: Color::RGB(67, 115, 208),
+        // label: "water",
+        height: 0.4,
+    },
+    Terrain {
+        color: Color::RGB(86, 152, 23),
+        // label: "land",
+        height: 1.0,
+    },
+];
+
 pub struct Board {
     bg: Vec<Vec<f64>>,
     state: Vec<Vec<bool>>,
@@ -127,9 +145,15 @@ impl Board {
                     continue;
                 }
 
-                let offset = self.bg[i][j] * 64.0;
-                let value = (190.0 + offset) as u8;
-                c.set_draw_color(Color::RGB(value, value, value));
+                for region in REGIONS {
+                    if self.bg[i][j] <= region.height {
+                        c.set_draw_color(region.color);
+                        break;
+                    }
+                }
+                // let offset = self.bg[i][j] * 64.0;
+                // let value = (190.0 + offset) as u8;
+                // c.set_draw_color(Color::RGB(value, value, value));
                 c.fill_rect(Rect::new(
                     (j * Board::CELL_SIZE) as i32,
                     (i * Board::CELL_SIZE) as i32,
