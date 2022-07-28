@@ -139,6 +139,7 @@ impl Map {
                         }
                     }
                 }
+
                 c.fill_rect(Rect::new(
                     ((j + x_offset) * Map::CELL_SIZE) as i32,
                     ((i + y_offset) * Map::CELL_SIZE) as i32,
@@ -172,8 +173,8 @@ pub struct Game {
     map: Map,
     menu: menu::Menu,
     rng: StdRng,
-    height: usize,
-    width: usize,
+    _height: usize,
+    _width: usize,
 }
 
 impl Game {
@@ -187,8 +188,8 @@ impl Game {
             map: map,
             menu: menu,
             rng: rng,
-            height: height,
-            width: width,
+            _height: height,
+            _width: width,
         }
     }
 
@@ -198,14 +199,15 @@ impl Game {
         } else {
             self.map = self.map.click(x, y);
         }
+
+        if self.menu.buttons[1].active {
+            self.map = self.map.randomize_bg(self.rng.gen());
+            self.menu.buttons[1].active = false;
+        }
     }
 
     pub fn tick(&mut self) {
         self.map = self.map.tick();
-    }
-
-    pub fn randomize_bg(&mut self) {
-        self.map = self.map.randomize_bg(self.rng.gen());
     }
 
     pub fn render(&self, c: &mut Canvas<Window>) {

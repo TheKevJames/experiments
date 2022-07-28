@@ -64,7 +64,7 @@ impl Menu {
     pub fn new(height: usize, width: usize) -> Menu {
         let buttons = [
             Button::new("Draw Perlin", height),
-            Button::new("Button 2", height),
+            Button::new("Randomize BG", height),
         ];
         Menu {
             buttons: buttons,
@@ -73,7 +73,7 @@ impl Menu {
         }
     }
 
-    pub fn click(&mut self, x: usize, y: usize) {
+    pub fn click(&mut self, x: usize, _y: usize) {
         if x < Button::WIDTH {
             self.buttons[0].click();
         } else if x < 2 * Button::WIDTH {

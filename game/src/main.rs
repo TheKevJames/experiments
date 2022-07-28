@@ -53,12 +53,6 @@ fn main() {
                     keycode: Some(Keycode::Q),
                     ..
                 } => break 'running,
-                Event::KeyDown {
-                    keycode: Some(Keycode::R),
-                    ..
-                } => {
-                    game.randomize_bg();
-                }
                 Event::MouseMotion { .. } => {}
                 Event::MouseButtonDown { .. } => {}
                 Event::MouseButtonUp {
