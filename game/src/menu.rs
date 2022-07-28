@@ -4,7 +4,7 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 pub struct Button {
-    active: bool,
+    pub active: bool,
     label: &'static str,
     height: usize,
 }
@@ -53,7 +53,7 @@ impl Button {
 }
 
 pub struct Menu {
-    buttons: [Button; 2],
+    pub buttons: [Button; 2],
     height: usize,
     width: usize,
 }
@@ -63,7 +63,7 @@ impl Menu {
 
     pub fn new(height: usize, width: usize) -> Menu {
         let buttons = [
-            Button::new("Button 1", height),
+            Button::new("Draw Perlin", height),
             Button::new("Button 2", height),
         ];
         Menu {

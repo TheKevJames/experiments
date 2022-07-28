@@ -109,7 +109,7 @@ impl Map {
         }
     }
 
-    pub fn render(&self, c: &mut Canvas<Window>, x: usize, y: usize) {
+    pub fn render(&self, c: &mut Canvas<Window>, x: usize, y: usize, draw_perlin: bool) {
         let x_offset = x / Map::CELL_SIZE;
         let y_offset = y / Map::CELL_SIZE;
 
@@ -127,15 +127,18 @@ impl Map {
                     continue;
                 }
 
-                for region in REGIONS {
-                    if self.bg[i][j] <= region.height {
-                        c.set_draw_color(region.color);
-                        break;
+                if draw_perlin {
+                    let offset = self.bg[i][j] * 64.0;
+                    let value = (190.0 + offset) as u8;
+                    c.set_draw_color(Color::RGB(value, value, value));
+                } else {
+                    for region in REGIONS {
+                        if self.bg[i][j] <= region.height {
+                            c.set_draw_color(region.color);
+                            break;
+                        }
                     }
                 }
-                // let offset = self.bg[i][j] * 64.0;
-                // let value = (190.0 + offset) as u8;
-                // c.set_draw_color(Color::RGB(value, value, value));
                 c.fill_rect(Rect::new(
                     ((j + x_offset) * Map::CELL_SIZE) as i32,
                     ((i + y_offset) * Map::CELL_SIZE) as i32,
@@ -210,7 +213,7 @@ impl Game {
 
         // TODO: clear before renders?
         self.menu.render(c, 0, 0);
-        self.map.render(c, 0, 50);
+        self.map.render(c, 0, 50, self.menu.buttons[0].active);
 
         c.present();
     }
