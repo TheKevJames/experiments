@@ -1,3 +1,4 @@
 **/build/*
 *.jar
 .gradle/*
+keystore.properties
