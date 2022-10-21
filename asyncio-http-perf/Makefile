@@ -14,7 +14,7 @@ README.rst: README.src perf.rst
 	cat $(word 2,$^) >>$@
 
 perf.rst: perf.md
-	sed -i 's/poetry run client //' $^
+	sed -i~ 's/poetry run client //' $^
 	pandoc -trst --wrap=none $< >$@
 
 perf.md:
