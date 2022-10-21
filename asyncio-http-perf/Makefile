@@ -22,7 +22,7 @@ perf.md:
 		--show-output \
 		--export-json perf.json \
 		--export-markdown $@ \
-		-L client aiohttp,asks,httpx \
+		-L client aiohttp,httpx \
 		'poetry run client {client} run --count=1 --batch=1' \
 		'poetry run client {client} run --count=10 --batch=1' \
 		'poetry run client {client} run --count=10 --batch=10' \
