@@ -62,6 +62,9 @@ Drives`_ first, then you can do the following:
     # compilation and dealing with boostrapping multiple go versions
     $ curl -fsSL https://get.docker.com -o get-docker.sh
     $ sudo sh ./get-docker.sh
+    $ sudo groupadd docker
+    $ sudo usermod -aG docker $USER
+    # log out and back in
 
     ## HASS, Dashy
     # install dependencies we'll need later
@@ -78,8 +81,8 @@ Drives`_ first, then you can do the following:
     # scp FOO pi@pihole:~/src/experiments/selfhost/hass/
 
     # start hass
-    $ sudo docker compose pull
-    $ sudo docker compose up -d
+    $ docker compose pull
+    $ docker compose up -d
 
     # setup the admin account, unless you restored from a backup
     # visit http://pi.hole:8123/
@@ -98,10 +101,9 @@ To update the various components:
 
     cd ~/src/experiments/selfhost
     git pull
-
-    sudo docker compose pull
-    sudo docker compose down
-    sudo docker compose up -d
+    docker compose pull
+    docker compose down
+    docker compose up -d
 
 Mounting External Disks
 -----------------------
