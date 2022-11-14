@@ -53,35 +53,35 @@ Drives`_ first, then you can do the following:
     # the SERVER should be using the IPv4 and IPv6 addresses you found earlier
 
     # upgrade and restart
-    sudo apt upgrade -y
-    sudo poweroff --reboot
+    $ sudo apt upgrade -y
+    $ sudo poweroff --reboot
 
     ## DOCKER
     # install docker
     # TODO: switch over to podman once raspbian supports it without manual
     # compilation and dealing with boostrapping multiple go versions
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh ./get-docker.sh
+    $ curl -fsSL https://get.docker.com -o get-docker.sh
+    $ sudo sh ./get-docker.sh
 
-    ## HASS
+    ## HASS, Dashy
     # install dependencies we'll need later
-    sudo apt update -y
-    sudo apt install -y git
+    $ sudo apt update -y
+    $ sudo apt install -y git
 
     # grab the config
-    git clone https://github.com/TheKevJames/experiments ~/src/experiments
-    cd ~/src/experiments/selfhost
+    $ git clone https://github.com/TheKevJames/experiments ~/src/experiments
+    $ cd ~/src/experiments/selfhost
 
     # configure any secrets in your config
-    vi ./hass/secrets.yaml
+    $ vi ./hass/secrets.yaml
     # restore any backups (gitignore'd by default!)
     # scp FOO pi@pihole:~/src/experiments/selfhost/hass/
 
     # start hass
-    sudo docker compose pull
-    sudo docker compose up -d
+    $ sudo docker compose pull
+    $ sudo docker compose up -d
 
-    # setup the admin account
+    # setup the admin account, unless you restored from a backup
     # visit http://pi.hole:8123/
 
 Updates
