@@ -3,13 +3,11 @@ version: '3.8'
 services:
   hass:
     container_name: hass
-    image: ghcr.io/home-assistant/home-assistant:stable
+    image: docker.io/home-assistant/home-assistant:stable
     environment:
       - TZ=Europe/Lisbon
-    # network_mode: host
-    # privileged: true
-    ports:
-      - 8123:8123
+    network_mode: host
     restart: unless-stopped
     volumes:
-      - ./hass:/config
+      - /etc/localtime:/etc/localtime:ro
+      - ~/src/experiments/selfhost/hass:/config:Z
