@@ -3,9 +3,7 @@ version: '3.8'
 services:
   hass:
     container_name: hass
-    image: docker.io/home-assistant/home-assistant:stable
-    environment:
-      - TZ=Europe/Lisbon
+    image: docker.io/homeassistant/home-assistant:stable
     network_mode: host
     restart: unless-stopped
     volumes:

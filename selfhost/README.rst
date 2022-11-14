@@ -74,17 +74,12 @@ Drives`_ first, then you can do the following:
 
     # configure any secrets in your config
     vi ./hass/secrets.yaml
-    vi ./hass/known_devices.yaml
+    # restore any backups (gitignore'd by default!)
+    # scp FOO pi@pihole:~/src/experiments/selfhost/hass/
 
     # start hass
-    sudo docker pull docker.io/homeassistant/home-assistant:stable
-    sudo docker run -d \
-        --name hass \
-        --restart=unless-stopped \
-        --network=host \
-        -v /etc/localtime:/etc/localtime:ro \
-        -v ~/src/experiments/selfhost/hass:/config:Z \
-        homeassistant/home-assistant:stable
+    sudo docker compose pull
+    sudo docker compose up -d
 
     # setup the admin account
     # visit http://pi.hole:8123/
@@ -101,16 +96,12 @@ To update the various components:
 
     pihole -up
 
-    sudo docker pull docker.io/homeassistant/home-assistant:stable
-    sudo docker stop hass
-    sudo docker rm hass
-    sudo docker run -d \
-        --name hass \
-        --restart=unless-stopped \
-        --network=host \
-        -v /etc/localtime:/etc/localtime:ro \
-        -v ~/src/experiments/selfhost/hass:/config:Z \
-        homeassistant/home-assistant:stable
+    cd ~/src/experiments/selfhost
+    git pull
+
+    sudo docker compose pull
+    sudo docker compose down
+    sudo docker compose up -d
 
 Mounting External Disks
 -----------------------
