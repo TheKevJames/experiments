@@ -15,9 +15,11 @@ Drives`_ first, then you can do the following:
 
 .. code-block:: console
 
+    ## PI
     # use the visual setup to configure yourself the correct locale
     $ sudo raspi-config
 
+    ## PI-HOLE
     # follow the visual prompts
     $ curl -sSL https://install.pi-hole.net | bash
     # set your admin panel password, if you enabled it
@@ -50,10 +52,42 @@ Drives`_ first, then you can do the following:
     $ dig -6 example.com | grep SERVER
     # the SERVER should be using the IPv4 and IPv6 addresses you found earlier
 
+    # upgrade and restart
+    sudo apt upgrade -y
+    sudo poweroff --reboot
+
+    ## DOCKER
+    # install docker
+    # TODO: switch over to podman once raspbian supports it without manual
+    # compilation and dealing with boostrapping multiple go versions
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh ./get-docker.sh
+
+    ## HASS
+    # install dependencies we'll need later
     sudo apt update -y
     sudo apt install -y git
+
+    # grab the config
     git clone https://github.com/TheKevJames/experiments ~/src/experiments
     cd ~/src/experiments/selfhost
+
+    # configure any secrets in your config
+    vi ./hass/secrets.yaml
+    vi ./hass/known_devices.yaml
+
+    # start hass
+    sudo docker pull docker.io/homeassistant/home-assistant:stable
+    sudo docker run -d \
+        --name hass \
+        --restart=unless-stopped \
+        --network=host \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v ~/src/experiments/selfhost/hass:/config:Z \
+        homeassistant/home-assistant:stable
+
+    # setup the admin account
+    # visit http://pi.hole:8123/
 
 Updates
 -------
@@ -62,9 +96,21 @@ To update the various components:
 
 .. code-block:: console
 
-    # TODO: apt
+    sudo apt update -y
+    sudo apt upgrade -y
 
     pihole -up
+
+    sudo docker pull docker.io/homeassistant/home-assistant:stable
+    sudo docker stop hass
+    sudo docker rm hass
+    sudo docker run -d \
+        --name hass \
+        --restart=unless-stopped \
+        --network=host \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v ~/src/experiments/selfhost/hass:/config:Z \
+        homeassistant/home-assistant:stable
 
 Mounting External Disks
 -----------------------
@@ -106,7 +152,9 @@ TODOs
 -----
 
 * transmission
-* hass
+* hass > gcp?
+* hass > gcal
+* hass > spotify
 * investigate multi-pi
 * look at some of the new things from r/selfhost that I have bookmarked...
 * need to actually fixup the ``home.thekev.in`` mapping. Does HASS' cloudflare

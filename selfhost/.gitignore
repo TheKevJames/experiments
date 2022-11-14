@@ -3,6 +3,9 @@ hass/*.db-shm
 hass/*.db-wal
 hass/*.log
 hass/*.log.*
+hass/.cloud/*
+hass/.google.token
 hass/.storage/*
+hass/ip_bans.yaml
 hass/known_devices.yaml
 hass/secrets.yaml
