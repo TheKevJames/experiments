@@ -8,4 +8,4 @@ services:
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ~/src/experiments/selfhost/hass:/config:Z
+      - ./hass:/config:Z
