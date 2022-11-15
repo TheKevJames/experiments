@@ -22,6 +22,22 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./homepage:/app/config:Z
 
+  jellyfin:
+    container_name: jellyfin
+    image: ghcr.io/hotio/jellyfin:release
+    ports:
+      - "8096:8096"
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Etc/UTC
+      - UMASK=002
+    volumes:
+      - /mnt/1tb/torrents:/mnt/done
+      - /mnt/4tb/torrent/keep:/mnt/keep
+      - /mnt/4tb/torrent/seeding:/mnt/seeding
+      - ./jellyfin:/config
+
   qbittorrent:
     container_name: qbittorrent
     image: ghcr.io/hotio/qbittorrent:release
