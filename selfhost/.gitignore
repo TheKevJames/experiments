@@ -11,4 +11,5 @@ hass/known_devices.yaml
 hass/secrets.yaml
 homepage/logs/*
 qbittorrent/cache/*
+qbittorrent/config/qBittorrent-data.conf
 qbittorrent/data/*
