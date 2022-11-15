@@ -26,7 +26,7 @@ services:
     container_name: jellyfin
     image: ghcr.io/hotio/jellyfin:release
     ports:
-      - "8096:8096"
+      - 8096:8096
     environment:
       - PGID=1000
       - PUID=1000
