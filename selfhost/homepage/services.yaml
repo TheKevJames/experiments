@@ -1,4 +1,12 @@
 ---
+- Torrents:
+    - qBittorrent:
+        href: http://192.168.1.71:8080/
+        description: Torrent Client
+        icon: qbittorrent
+        server: my-docker
+        container: qbittorrent
+
 - Infrastructure:
     - HASS:
         href: http://192.168.1.71:8123/

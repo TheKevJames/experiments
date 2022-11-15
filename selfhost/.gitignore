@@ -10,3 +10,5 @@ hass/ip_bans.yaml
 hass/known_devices.yaml
 hass/secrets.yaml
 homepage/logs/*
+qbittorrent/cache/*
+qbittorrent/data/*

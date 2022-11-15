@@ -144,7 +144,6 @@ Quick walkthrough of how to fstab some external drives into being auto-mounted:
 TODOs
 -----
 
-* transmission
 * hass > gcp?
 * hass > gcal
 * hass > spotify

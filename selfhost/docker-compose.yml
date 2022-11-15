@@ -21,3 +21,21 @@ services:
       - /mnt:/mnt
       - /var/run/docker.sock:/var/run/docker.sock
       - ./homepage:/app/config:Z
+
+  qbittorrent:
+    container_name: qbittorrent
+    image: ghcr.io/hotio/qbittorrent:release
+    ports:
+      - 8080:8080
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Etc/UTC
+      - UMASK=002
+    volumes:
+      - /mnt/1tb/torrents:/mnt/done
+      - /mnt/4tb/torrent/keep:/mnt/keep
+      - /mnt/4tb/torrent/pending:/mnt/pending
+      - /mnt/4tb/torrent/seeding:/mnt/seeding
+      - /mnt/4tb/torrent/watch:/mnt/watch
+      - ./qbittorrent:/config
