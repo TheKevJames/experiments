@@ -10,6 +10,10 @@ hass/ip_bans.yaml
 hass/known_devices.yaml
 hass/secrets.yaml
 homepage/logs/*
+jellyfin/cache/*
+jellyfin/data/*
+jellyfin/dlna/*
+jellyfin/log/*
 qbittorrent/cache/*
 qbittorrent/config/qBittorrent-data.conf
 qbittorrent/config/lockfile

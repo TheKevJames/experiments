@@ -62,6 +62,7 @@ Drives`_ first, then you can do the following:
     # compilation and dealing with boostrapping multiple go versions
     $ curl -fsSL https://get.docker.com -o get-docker.sh
     $ sudo sh ./get-docker.sh
+    $ rm get-docker.sh
     $ sudo groupadd docker
     $ sudo usermod -aG docker $USER
     # log out and back in

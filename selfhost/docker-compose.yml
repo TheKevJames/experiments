@@ -34,8 +34,10 @@ services:
       - UMASK=002
     volumes:
       - /mnt/1tb/torrents:/mnt/done
-      - /mnt/4tb/torrent/keep:/mnt/keep
-      - /mnt/4tb/torrent/seeding:/mnt/seeding
+      - /mnt/4tb/torrents/keep:/mnt/keep
+      - /mnt/4tb/torrents/seeding:/mnt/seeding
+      - /mnt/4tb/movies:/mnt/movies
+      - /mnt/4tb/shows:/mnt/shows
       - ./jellyfin:/config
 
   qbittorrent:
@@ -50,8 +52,8 @@ services:
       - UMASK=002
     volumes:
       - /mnt/1tb/torrents:/mnt/done
-      - /mnt/4tb/torrent/keep:/mnt/keep
-      - /mnt/4tb/torrent/pending:/mnt/pending
-      - /mnt/4tb/torrent/seeding:/mnt/seeding
-      - /mnt/4tb/torrent/watch:/mnt/watch
+      - /mnt/4tb/torrents/keep:/mnt/keep
+      - /mnt/4tb/torrents/pending:/mnt/pending
+      - /mnt/4tb/torrents/seeding:/mnt/seeding
+      - /mnt/4tb/torrents/watch:/mnt/watch
       - ./qbittorrent:/config
