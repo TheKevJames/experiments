@@ -12,4 +12,6 @@ hass/secrets.yaml
 homepage/logs/*
 qbittorrent/cache/*
 qbittorrent/config/qBittorrent-data.conf
+qbittorrent/config/lockfile
+qbittorrent/config/rss/storage.lock
 qbittorrent/data/*
