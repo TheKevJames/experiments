@@ -5,7 +5,8 @@
     disk: /
 
 - resources:
-    disk: /mnt/1tb
-
-- resources:
-    disk: /mnt/4tb
+    label: Storage
+    expanded: true
+    disk:
+        - /mnt/1tb
+        - /mnt/4tb

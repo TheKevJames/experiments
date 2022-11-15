@@ -153,5 +153,6 @@ TODOs
 * need to actually fixup the ``home.thekev.in`` mapping. Does HASS' cloudflare
   integration solve those issues? How can I make that work with the multiple
   Pi's handling different svcs on different ports?
+* move pi to different port, make homepage :80
 
 .. _Install Raspbian OS Lite x64: https://www.raspberrypi.com/software/

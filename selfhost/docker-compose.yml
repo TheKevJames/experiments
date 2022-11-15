@@ -18,6 +18,6 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - /etc/localtime:/etc/localtime:ro
+      - /mnt:/mnt
       - /var/run/docker.sock:/var/run/docker.sock
       - ./homepage:/app/config:Z
