@@ -1,29 +1,23 @@
 version: '3.8'
 
 services:
-  dashy:
-    image: ghcr.io/lissy93/dashy:latest
-    container_name: dashy
-    environment:
-      - NODE_ENV=production
-      - UID=1000
-      - GID=1000
-    ports:
-      - 4000:80
-    restart: unless-stopped
-    volumes:
-      - ./dashy/config.yml:/app/public/conf.yml
-    healthcheck:
-      test: ['CMD', 'node', '/app/services/healthcheck']
-      interval: 1m30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
   hass:
     container_name: hass
-    image: docker.io/homeassistant/home-assistant:stable
-    network_mode: host
+    image: ghcr.io/home-assistant/home-assistant:stable
+    ports:
+      - 8123:8123
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./hass:/config:Z
+
+  homepage:
+    container_name: homepage
+    image: ghcr.io/benphelps/homepage:latest
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./homepage:/app/config:Z

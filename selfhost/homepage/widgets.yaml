@@ -1,0 +1,11 @@
+---
+- resources:
+    cpu: true
+    memory: true
+    disk: /
+
+- resources:
+    disk: /mnt/1tb
+
+- resources:
+    disk: /mnt/4tb

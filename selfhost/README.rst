@@ -66,7 +66,7 @@ Drives`_ first, then you can do the following:
     $ sudo usermod -aG docker $USER
     # log out and back in
 
-    ## HASS, Dashy
+    ## HASS, Homepage
     # install dependencies we'll need later
     $ sudo apt update -y
     $ sudo apt install -y git
@@ -100,9 +100,9 @@ To update the various components:
     pihole -up
 
     cd ~/src/experiments/selfhost
+    docker compose down
     git pull
     docker compose pull
-    docker compose down
     docker compose up -d
 
 Mounting External Disks

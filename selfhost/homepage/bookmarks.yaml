@@ -1,0 +1,18 @@
+---
+- Dev:
+    - Github:
+        - abbr: GH
+          href: https://github.com/
+    - Selfhost Source Code:
+        - abbr: SC
+          href: https://github.com/TheKevJames/experiments/tree/master/selfhost
+
+- Social:
+    - Reddit:
+        - abbr: RE
+          href: https://reddit.com/
+
+- Fun:
+    - YouTube:
+        - abbr: YT
+          href: https://youtube.com/
