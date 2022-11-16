@@ -145,6 +145,7 @@ Quick walkthrough of how to fstab some external drives into being auto-mounted:
 TODOs
 -----
 
+* jellyfin config
 * hass > gcp?
 * hass > gcal
 * hass > spotify

@@ -14,9 +14,9 @@ services:
   homepage:
     container_name: homepage
     image: ghcr.io/benphelps/homepage:latest
-    restart: unless-stopped
     ports:
       - 3000:3000
+    restart: unless-stopped
     volumes:
       - /mnt:/mnt
       - /var/run/docker.sock:/var/run/docker.sock
@@ -27,6 +27,7 @@ services:
     image: ghcr.io/hotio/jellyfin:release
     ports:
       - 8096:8096
+    restart: unless-stopped
     environment:
       - PGID=1000
       - PUID=1000
@@ -45,6 +46,7 @@ services:
     image: ghcr.io/hotio/qbittorrent:release
     ports:
       - 8080:8080
+    restart: unless-stopped
     environment:
       - PGID=1000
       - PUID=1000
