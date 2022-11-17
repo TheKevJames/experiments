@@ -19,6 +19,16 @@ Drives`_ first, then you can do the following:
     # use the visual setup to configure yourself the correct locale
     $ sudo raspi-config
 
+    # consider increasing your swap size and moving it off your sd card
+    $ sudo dphys-swapfile swapoff
+    $ sudo vi /etc/dphys-swapfile
+    # CONF_SWAPFILE=/mnt/1tb/swap
+    # CONF_SWAPSIZE=2048
+    $ sudo mv /var/swap /mnt/1tb/swap
+    $ sudo dphys-swapfile setup
+    $ sudo dphys-swapfile swapon
+    $ sudo poweroff --reboot
+
     ## PI-HOLE
     # follow the visual prompts
     $ curl -sSL https://install.pi-hole.net | bash
