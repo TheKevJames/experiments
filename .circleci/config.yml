@@ -46,11 +46,12 @@ jobs:
       - run: poetry config installer.parallel false
       - run: poetry config --list
       - run: |
-          sed -i~ 's#package = operation.package#package = operation.package; self._io.write(f"{package}")#/g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/installation/executor.py
-
-      - run: |
+          sed -i~ 's#Package operations#Package ops from installer#g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/installation/installer.py
+          sed -i~ 's#Package operations#Package ops from executor#g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/installation/executor.py
+          sed -i~ 's#package = operation.package#package = operation.package; self._io.write(f"{package}")#g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/installation/executor.py
           sed -i~ 's#pip-version-check#pip-version-check", "--log", "/tmp/pip.log#g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/utils/pip.py
-      - run: cat /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/utils/pip.py
+          sed -i~ 's#PIE786#\n            import traceback; self._io.write(f"{traceback.format_exc()}"); raise#g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/installation/executor.py
+          cat /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/installation/executor.py
       - run: poetry self add keyrings.google-artifactregistry.auth -vvv
       - run:
           command: cat /tmp/pip.log
