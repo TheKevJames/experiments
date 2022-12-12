@@ -51,10 +51,7 @@ jobs:
       - run: |
           sed -i~ 's#pip-version-check#pip-version-check", "--log", "/tmp/pip.log#g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/utils/pip.py
       - run: cat /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/utils/pip.py
-      - run: strace -o /tmp/poetry.strace --follow-forks poetry self add keyrings.google-artifactregistry.auth -vvv
-      - run:
-          command: cat /tmp/poetry.strace
-          when: always
+      - run: poetry self add keyrings.google-artifactregistry.auth -vvv
       - run:
           command: cat /tmp/pip.log
           when: always
