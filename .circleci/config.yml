@@ -1,13 +1,16 @@
 version: 2.1
 
 orbs:
-  linter: thekevjames/linter@0
+  linter: talkiq/linter@3
+
+executors:
+  python:
+    docker:
+      - image: python:3.7.16
+    resource_class: small
 
 workflows:
   run-jobs:
     jobs:
       - linter/pre-commit:
-          python_version: 3.7.4
-          pre-steps:
-            - run: apt-get update
-            - run: apt-get install -qy shellcheck
+          executor: python
