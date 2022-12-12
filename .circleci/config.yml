@@ -45,7 +45,7 @@ jobs:
       - run: python3 -m pip --version
       - run: poetry config installer.parallel false
       - run: poetry config --list
-      - run: strace -o /tmp/poetry.strace --follow-forks poetry self add keyrings.google-artifactregistry.auth -vvv
+      - run: strace -o /tmp/poetry.strace --follow-forks poetry self add keyrings.google-artifactregistry.auth -vvv --dry-run
       - run:
           command: cat /tmp/poetry.strace
           when: always
