@@ -29,7 +29,7 @@ jobs:
         default: latest
     steps:
       - run: apt-get update -qy
-      - run: apt-get install -qy curl
+      - run: apt-get install -qy curl strace
       - when:
           condition: <<parameters.pip_up>>
           steps:
@@ -43,7 +43,12 @@ jobs:
       - run: echo 'export PATH="/root/.local/bin:${PATH}"' >> ${BASH_ENV}
       - run: python3 --version
       - run: python3 -m pip --version
-      - run: poetry self add keyrings.google-artifactregistry.auth -vvv
+      - run: poetry config installer.parallel false
+      - run: poetry config --list
+      - run: strace -o /tmp/poetry.strace --follow-forks poetry self add keyrings.google-artifactregistry.auth -vvv
+      - run:
+          command: cat /tmp/poetry.strace
+          when: always
 
 workflows:
   run-jobs:
