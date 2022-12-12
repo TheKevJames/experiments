@@ -98,6 +98,27 @@ Drives`_ first, then you can do the following:
     # setup the admin account, unless you restored from a backup
     # visit http://pi.hole:8123/
 
+    # SAMBA
+    # install dependencies
+    sudo apt update
+    sudo apt install samba samba-common-bin
+
+    # configure drives
+    # sudo vi /etc/samba/smb.conf
+    # [pi-1tb]
+    #   path = /mnt/1tb
+    #   browseable = yes
+    #   writeable = no
+    #   guest ok = yes
+
+    # create a samba user
+    # eg. username is "pi"
+    sudo smbpasswd -a pi
+
+    # restart samba
+    sudo systemctl restart smbd
+
+
 Updates
 -------
 
