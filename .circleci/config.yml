@@ -45,9 +45,18 @@ jobs:
       - run: python3 -m pip --version
       - run: poetry config installer.parallel false
       - run: poetry config --list
-      - run: strace -o /tmp/poetry.strace --follow-forks poetry self add keyrings.google-artifactregistry.auth -vvv --dry-run
+      - run: |
+          sed -i~ 's#package = operation.package#package = operation.package; self._io.write(f"{package}")#/g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/installation/executor.py
+
+      - run: |
+          sed -i~ 's#pip-version-check#pip-version-check", "--log", "/tmp/pip.log#g' /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/utils/pip.py
+      - run: cat /root/.local/share/pypoetry/venv/lib/python<<parameters.image>>/site-packages/poetry/utils/pip.py
+      - run: strace -o /tmp/poetry.strace --follow-forks poetry self add keyrings.google-artifactregistry.auth -vvv
       - run:
           command: cat /tmp/poetry.strace
+          when: always
+      - run:
+          command: cat /tmp/pip.log
           when: always
 
 workflows:
