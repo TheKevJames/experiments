@@ -9,8 +9,23 @@ executors:
       - image: python:3.7.16
     resource_class: small
 
+jobs:
+  x:
+    docker:
+      - image: python:<<parameters.image>>
+    parameters:
+      image:
+        type: string
+    steps:
+      - run: python3 -c 'import shutil; print(shutil.get_terminal_size())'
+      - run: python3 -c 'import shutil; print(shutil.get_terminal_size(fallback=(80, 24)))'
+
 workflows:
   run-jobs:
     jobs:
       - linter/pre-commit:
           executor: python
+      - x:
+          matrix:
+            parameters:
+              image: ['3.10', '3.11']
