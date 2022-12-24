@@ -1,8 +1,4 @@
 {
   "extends": ["github>thekevjames/tools:personal"],
-  "enabled": false,
-  "packageRules": [{
-    "paths": [".circleci/*", ".pre-commit-config.yaml"],
-    "enabled": true
-  }]
+  "enabled": false
 }
