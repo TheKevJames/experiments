@@ -7,15 +7,18 @@
         - abbr: SC
           href: https://github.com/TheKevJames/experiments/tree/master/selfhost
 
-- Social:
-    - Reddit:
-        - abbr: RE
-          href: https://reddit.com/
+- News:
+    - CurrentEvents:
+        - abbr: CE
+          href: https://en.wikipedia.org/wiki/Portal:Current_events
 
 - Fun:
     - NextEpisode:
         - abbr: NE
           href: https://next-episode.net/
+    - Reddit:
+        - abbr: RE
+          href: https://reddit.com/
     - YouTube:
         - abbr: YT
           href: https://youtube.com/
