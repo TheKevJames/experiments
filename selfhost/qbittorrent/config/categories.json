@@ -1,2 +1,8 @@
 {
+    "keep": {
+        "save_path": "/mnt/keep"
+    },
+    "seeding": {
+        "save_path": "/mnt/seeding"
+    }
 }
