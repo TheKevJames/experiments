@@ -1,3 +1,4 @@
 ---
 docker-local:
   socket: /var/run/docker.sock
+# TODO: docker-pi0, docker-pi1, ...

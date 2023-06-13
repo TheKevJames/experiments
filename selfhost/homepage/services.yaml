@@ -1,11 +1,11 @@
 ---
 - Media:
     - Jellyfin:
-        href: http://192.168.1.71:8096/
+        href: http://192.168.1.64:8096/
         description: Media Server
         icon: jellyfin
-        server: docker-local
-        container: jellyfin
+        # server: docker-local
+        # container: jellyfin
 
 - Torrents:
     - qBittorrent:
@@ -17,11 +17,11 @@
 
 - Infrastructure:
     - HASS:
-        href: http://192.168.1.71:8123/
+        href: http://192.168.1.64:8123/
         description: Home Assistant
         icon: home-assistant
-        server: docker-local
-        container: hass
+        # server: docker-local
+        # container: hass
 
 - Networking:
     - Pi-Hole:
