@@ -18,31 +18,7 @@ homeassistant:
   customize: !include customize.yaml
   packages: !include_dir_named packages
 
-config:
-counter:
-dhcp:
-frontend:
-history:
-image:
-input_boolean:
-input_button:
-input_datetime:
-input_number:
-input_select:
-input_text:
-logbook:
-map:
-# media_source:
-# mobile_app:
-recorder:
-ssdp:
-sun:
-system_health:
-timer:
-usb:
-zeroconf:
-
-discovery:
+default_config:
 
 device_tracker:
   # TODO: figure this out
@@ -55,18 +31,18 @@ device_tracker:
 
   - platform: ping
     hosts:
-      dialbox: 192.168.1.64
+      applebox: 192.168.1.64
+      dialbox: 192.168.1.73
       extender: 192.168.1.65
-      pixelpad: 192.168.1.66
-      pi0: 192.168.1.67
+      pi1: 192.168.1.71
 
 person:
   - name: Kevin
     id: kevin
-    user_id: 0c2a75f55ae64a3aa527cd7855bee058
+    user_id: 42369f615a514199aac15c4f8bcece33
     device_trackers:
       - device_tracker.dialbox
-      - device_tracker.pixelpad
+      - device_tracker.galaxypad
 
 automation: !include automations.yaml
 script: !include scripts.yaml

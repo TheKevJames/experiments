@@ -1,15 +1,21 @@
+device_tracker.applebox:
+  friendly_name: applebox
+  icon: mdi:server
 device_tracker.dialbox:
   friendly_name: dialbox
   icon: mdi:laptop
 device_tracker.extender:
   friendly_name: Huawei OptiXstar
   icon: mdi:router-wireless
+device_tracker.galaxypad:
+  friendly_name: galaxypad
+  icon: mdi:cellphone
 device_tracker.pi0:
   friendly_name: pi-0
   icon: mdi:server
-device_tracker.pixelpad:
-  friendly_name: pixelpad
-  icon: mdi:cellphone
+device_tracker.pi1:
+  friendly_name: pi-1
+  icon: mdi:server
 
 person.kevin:
   entity_picture: https://gravatar.com/avatar/ba8ec5ac9fe95bb410bda4416aba08c8.jpg
