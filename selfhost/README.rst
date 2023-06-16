@@ -91,9 +91,9 @@ Drives`_ first, then you can do the following:
     # restore any backups (gitignore'd by default!)
     # scp FOO pi@pihole:~/src/experiments/selfhost/hass/
 
-    # start hass
+    # start images
     $ docker compose pull
-    $ docker compose up -d
+    $ docker compose --profile pi-1 up -d
 
     # setup the admin account, unless you restored from a backup
     # visit http://pi.hole:8123/

@@ -4,8 +4,8 @@
         href: http://192.168.1.64:8096/
         description: Media Server
         icon: jellyfin
-        # server: docker-local
-        # container: jellyfin
+        server: docker-local
+        container: jellyfin
 
 - Torrents:
     - qBittorrent:
@@ -20,14 +20,26 @@
         href: http://192.168.1.64:8123/
         description: Home Assistant
         icon: home-assistant
-        # server: docker-local
-        # container: hass
+        server: docker-local
+        container: hass
+    - Homepage:
+        href: http://192.168.1.64:3000/
+        description: Homepage on applebox
+        icon: mdi-home-circle
+        server: docker-local
+        container: homepage
+    - Homepage:
+        href: http://192.168.1.71:3000/
+        description: Homepage on pi-1
+        icon: mdi-home-circle
+        server: docker-local
+        container: homepage
 
 - Networking:
     - Pi-Hole:
         href: http://192.168.1.71/admin/
         description: Pi-Hole Admin Portal
-        icon: pihole
+        icon: pi-hole
         widget:
             type: pihole
             url: http://192.168.1.71

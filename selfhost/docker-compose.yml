@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   hass:
+    profiles:
+      - applebox
     container_name: hass
     image: ghcr.io/home-assistant/home-assistant:stable
     ports:
@@ -12,6 +14,8 @@ services:
       - ./hass:/config:Z
 
   homepage:
+    profiles:
+      - pi-1
     container_name: homepage
     image: ghcr.io/benphelps/homepage:latest
     ports:
@@ -23,6 +27,8 @@ services:
       - ./homepage:/app/config:Z
 
   jellyfin:
+    profiles:
+      - applebox
     container_name: jellyfin
     image: ghcr.io/hotio/jellyfin:release
     ports:
@@ -42,6 +48,8 @@ services:
       - ./jellyfin:/config
 
   qbittorrent:
+    profiles:
+      - pi-1
     container_name: qbittorrent
     image: ghcr.io/hotio/qbittorrent:release
     ports:
