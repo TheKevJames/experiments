@@ -14,8 +14,6 @@ services:
       - ./hass:/config:Z
 
   homepage:
-    profiles:
-      - pi-1
     container_name: homepage
     image: ghcr.io/benphelps/homepage:latest
     ports:
