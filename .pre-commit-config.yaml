@@ -2,6 +2,9 @@ ci:
     autofix_commit_msg: 'refactor(lint): apply automatic lint fixes'
     autoupdate_commit_msg: 'chore(deps): bump pre-commit linter versions'
 
+default_language_version:
+    python: python3.11
+
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -17,7 +20,7 @@ repos:
     -   id: check-xml
     -   id: check-yaml
         args: [--allow-multiple-documents]
-        exclude: selfhost/hass/.*
+        exclude: selfhost/hass/.*  # TODO
     -   id: detect-private-key
     -   id: end-of-file-fixer
     -   id: mixed-line-ending
@@ -25,7 +28,10 @@ repos:
     -   id: trailing-whitespace
 
 # python
+    # -   id: check-ast  # TODO
+    # -   id: check-builtin-literals  # TODO
     -   id: check-docstring-first
+    # -   id: debug-statements  # TODO
     -   id: double-quote-string-fixer
     -   id: name-tests-test
     -   id: requirements-txt-fixer
@@ -34,15 +40,48 @@ repos:
     hooks:
     -   id: remove-crlf
     -   id: remove-tabs
-        files: .*\.py$
+        files: '.*\.py$'
 -   repo: https://github.com/asottile/yesqa
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
     -   id: yesqa
+        # N.B. keep these in sync with flake8, otherwise yesqa will remove
+        # required noqa's related to these plugins
+        additional_dependencies: &flake8deps
+        - flake8-2020==1.8.1
+        - flake8-broken-line==1.0.0
+        - flake8-builtins==2.1.0
+        - flake8-commas==2.1.0
+        - flake8-comprehensions==3.13.0
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v2.0.2
     hooks:
     -   id: autopep8
+        args: [-a, -i, -p2]
+-   repo: local
+    hooks:
+    -   id: poetry-check
+        name: check pyproject.toml validity
+        description: 'Validate the structure of the pyproject.toml file'
+        entry: bash -c 'set -e; for toml in "$@"; do pushd ./${toml%pyproject.toml}; poetry check; popd; done' --
+        language: python
+        additional_dependencies:
+        - poetry>=1.2.0
+        pass_filenames: true
+        files: 'pyproject\.toml$'
+    -   id: poetry-use-version-ranges
+        name: avoid using carets for version ranges
+        description: 'Avoid using carets for version ranges'
+        entry: '\^'
+        language: pygrep
+        types: [toml]
+        files: 'pyproject.toml$'
+    -   id: pytest-fixtures-require-scope
+        name: ensure pytest fixture scopes are explicitly set
+        description: 'Ensure we explicitly set pytest fixture scopes'
+        entry: '@pytest\.fixture( |\n|(\(\)))'
+        language: pygrep
+        types: [python]
 -   repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -54,6 +93,15 @@ repos:
     -   id: rst-backticks
     -   id: rst-directive-colons
     -   id: rst-inline-touching-normal
+
+# json
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.23.2
+  hooks:
+    - id: check-github-workflows
+    - id: check-renovate
+      additional_dependencies:
+      - pyjson5
 
 # shell
 -   repo: https://github.com/lovesegfault/beautysh
