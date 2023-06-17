@@ -43,6 +43,22 @@ services:
       - /mnt/4tb/shows:/data/media/shows
       - ./jellyfin:/config:Z
 
+  prowlarr:
+    profiles:
+      - pi-1
+    container_name: prowlarr
+    image: lscr.io/linuxserver/prowlarr:latest
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Etc/UTC
+      - UMASK=002
+    volumes:
+      - ./prowlarr:/config:Z
+
   qbittorrent:
     profiles:
       - pi-1

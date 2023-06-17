@@ -17,6 +17,8 @@ jellyfin/data/metadata/*
 jellyfin/data/transcodes/*
 jellyfin/dlna/*
 jellyfin/log/*
+prowlarr/*
+!prowlarr/config.xml
 qbittorrent/cache/*
 qbittorrent/config/qBittorrent-data.conf
 qbittorrent/config/lockfile
