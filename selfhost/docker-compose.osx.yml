@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  homepage:
+    volumes:
+      - /Volumes/pi-1tb:/mnt/1tb
+      - /Volumes/pi-4tb:/mnt/4tb
+
+  jellyfin:
+    volumes:
+      - /Volumes/pi-4tb/movies:/data/media/movies
+      - /Volumes/pi-4tb/shows:/data/media/shows
+
+  qbittorrent:
+    volumes:
+      - /Volumes/pi-1tb/torrents:/data/torrents
+
+  radarr:
+    volumes:
+      - /Volumes/pi-1tb/torrents:/data/torrents
+      - /Volumes/pi-4tb/movies:/data/media/movies
