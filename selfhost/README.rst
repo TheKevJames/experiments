@@ -93,7 +93,7 @@ Drives`_ first, then you can do the following:
 
     # start images
     $ docker compose pull
-    $ docker compose --profile pi-1 up -d
+    $ docker compose --profile=$(hostname) up -d
 
     # setup the admin account, unless you restored from a backup
     # visit http://pi.hole:8123/
@@ -104,12 +104,23 @@ Drives`_ first, then you can do the following:
     sudo apt install samba samba-common-bin
 
     # configure drives
-    # sudo vi /etc/samba/smb.conf
+    # $ sudo vi /etc/samba/smb.conf
+    # # For a readonly drive:
     # [pi-1tb]
     #   path = /mnt/1tb
     #   browseable = yes
     #   writeable = no
     #   guest ok = yes
+    # # Or, to allow writes:
+    # [pi-4tb]
+    #   path = /mnt/4tb
+    #   browseable = yes
+    #   writeable = yes
+    #   guest ok = yes
+    #   public = yes
+    #   create mask = 6444
+    #   directory mask = 0755
+    #   force user = pi
 
     # create a samba user
     # eg. username is "pi"
@@ -132,10 +143,9 @@ To update the various components:
     pihole -up
 
     cd ~/src/experiments/selfhost
-    docker compose down
     git pull
-    docker compose pull
-    docker compose up -d
+    docker compose --profile=$(hostname) pull
+    docker compose --profile=$(hostname) up -d
 
 Mounting External Disks
 -----------------------
@@ -176,15 +186,13 @@ Quick walkthrough of how to fstab some external drives into being auto-mounted:
 TODOs
 -----
 
-* jellyfin config
 * hass > gcp?
 * hass > gcal
 * hass > spotify
-* investigate multi-pi
-* look at some of the new things from r/selfhost that I have bookmarked...
 * need to actually fixup the ``home.thekev.in`` mapping. Does HASS' cloudflare
   integration solve those issues? How can I make that work with the multiple
   Pi's handling different svcs on different ports?
 * move pi to different port, make homepage :80
+* move to exclusively linuxserver.io images
 
 .. _Install Raspbian OS Lite x64: https://www.raspberrypi.com/software/

@@ -1,12 +1,12 @@
 {
-    "/mnt/watch": {
+    "/data/torrents": {
         "add_torrent_params": {
             "category": "",
             "download_limit": -1,
-            "download_path": "/mnt/done",
+            "download_path": "/data/torrents",
             "operating_mode": "AutoManaged",
             "ratio_limit": -2,
-            "save_path": "/mnt/watch",
+            "save_path": "/data/torrents",
             "seeding_time_limit": -2,
             "skip_checking": false,
             "tags": [

@@ -1,8 +1,8 @@
 {
-    "keep": {
-        "save_path": "/mnt/keep"
+    "movies": {
+        "save_path": "/data/torrents/movies"
     },
-    "seeding": {
-        "save_path": "/mnt/seeding"
+    "shows": {
+        "save_path": "/data/torrents/shows"
     }
 }

@@ -20,7 +20,8 @@ services:
       - 3000:3000
     restart: unless-stopped
     volumes:
-      - /mnt:/mnt
+      - /mnt/1tb:/mnt/1tb
+      - /mnt/4tb:/mnt/4tb
       - /var/run/docker.sock:/var/run/docker.sock
       - ./homepage:/app/config:Z
 
@@ -38,11 +39,8 @@ services:
       - TZ=Etc/UTC
       - UMASK=002
     volumes:
-      - /mnt/1tb/torrents:/mnt/done
-      - /mnt/4tb/torrents/keep:/mnt/keep
-      - /mnt/4tb/torrents/seeding:/mnt/seeding
-      - /mnt/4tb/movies:/mnt/movies
-      - /mnt/4tb/shows:/mnt/shows
+      - /mnt/4tb/movies:/data/media/movies
+      - /mnt/4tb/shows:/data/media/shows
       - ./jellyfin:/config:Z
 
   qbittorrent:
@@ -59,11 +57,7 @@ services:
       - TZ=Etc/UTC
       - UMASK=002
     volumes:
-      - /mnt/1tb/torrents:/mnt/done
-      - /mnt/4tb/torrents/keep:/mnt/keep
-      - /mnt/4tb/torrents/pending:/mnt/pending
-      - /mnt/4tb/torrents/seeding:/mnt/seeding
-      - /mnt/4tb/torrents/watch:/mnt/watch
+      - /mnt/1tb/torrents:/data/torrents
       - ./qbittorrent:/config:Z
 
   radarr:
