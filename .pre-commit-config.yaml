@@ -23,6 +23,7 @@ repos:
         exclude: selfhost/hass/.*  # TODO
     -   id: detect-private-key
     -   id: end-of-file-fixer
+        exclude: selfhost/jellyfin/.*  # TODO
     -   id: mixed-line-ending
         args: [--fix=lf]
     -   id: trailing-whitespace

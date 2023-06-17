@@ -9,15 +9,17 @@
       <Path>/data/media/movies</Path>
     </MediaPathInfo>
   </PathInfos>
-  <SaveLocalMetadata>false</SaveLocalMetadata>
+  <SaveLocalMetadata>true</SaveLocalMetadata>
   <EnableAutomaticSeriesGrouping>false</EnableAutomaticSeriesGrouping>
   <EnableEmbeddedTitles>false</EnableEmbeddedTitles>
   <EnableEmbeddedEpisodeInfos>false</EnableEmbeddedEpisodeInfos>
   <AutomaticRefreshIntervalDays>0</AutomaticRefreshIntervalDays>
-  <PreferredMetadataLanguage />
-  <MetadataCountryCode />
+  <PreferredMetadataLanguage>en</PreferredMetadataLanguage>
+  <MetadataCountryCode>US</MetadataCountryCode>
   <SeasonZeroDisplayName>Specials</SeasonZeroDisplayName>
-  <MetadataSavers />
+  <MetadataSavers>
+    <string>Nfo</string>
+  </MetadataSavers>
   <DisabledLocalMetadataReaders />
   <LocalMetadataReaderOrder>
     <string>Nfo</string>
@@ -29,7 +31,7 @@
   <SubtitleDownloadLanguages />
   <RequirePerfectSubtitleMatch>true</RequirePerfectSubtitleMatch>
   <SaveSubtitlesWithMedia>true</SaveSubtitlesWithMedia>
-  <AutomaticallyAddToCollection>false</AutomaticallyAddToCollection>
+  <AutomaticallyAddToCollection>true</AutomaticallyAddToCollection>
   <AllowEmbeddedSubtitles>AllowAll</AllowEmbeddedSubtitles>
   <TypeOptions>
     <TypeOptions>
