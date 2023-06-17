@@ -65,3 +65,21 @@ services:
       - /mnt/4tb/torrents/seeding:/mnt/seeding
       - /mnt/4tb/torrents/watch:/mnt/watch
       - ./qbittorrent:/config
+
+  radarr:
+    profiles:
+      - pi-1
+    container_name: radarr
+    image: lscr.io/linuxserver/radarr:latest
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Etc/UTC
+      - UMASK=002
+    volumes:
+      - /mnt/1tb/torrents:/data/torrents
+      - /mnt/4tb/movies:/data/media/movies
+      - ./radarr:/config

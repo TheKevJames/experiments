@@ -6,6 +6,12 @@
         icon: jellyfin
         server: docker-local
         container: jellyfin
+    - Radarr:
+        href: http://192.168.1.71:7878/
+        description: Movie Collection Manager
+        icon: radarr
+        server: docker-local
+        container: radarr
 
 - Torrents:
     - qBittorrent:
