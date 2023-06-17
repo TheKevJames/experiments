@@ -43,7 +43,7 @@ services:
       - /mnt/4tb/torrents/seeding:/mnt/seeding
       - /mnt/4tb/movies:/mnt/movies
       - /mnt/4tb/shows:/mnt/shows
-      - ./jellyfin:/config
+      - ./jellyfin:/config:Z
 
   qbittorrent:
     profiles:
@@ -64,7 +64,7 @@ services:
       - /mnt/4tb/torrents/pending:/mnt/pending
       - /mnt/4tb/torrents/seeding:/mnt/seeding
       - /mnt/4tb/torrents/watch:/mnt/watch
-      - ./qbittorrent:/config
+      - ./qbittorrent:/config:Z
 
   radarr:
     profiles:
@@ -82,4 +82,4 @@ services:
     volumes:
       - /mnt/1tb/torrents:/data/torrents
       - /mnt/4tb/movies:/data/media/movies
-      - ./radarr:/config
+      - ./radarr:/config:Z
