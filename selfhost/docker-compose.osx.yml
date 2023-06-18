@@ -28,6 +28,11 @@ services:
       - /Volumes/pi-1tb/torrents:/data/torrents
       - /Volumes/pi-4tb/movies:/data/media/movies
 
+  readarr:
+    volumes:
+      - /Volumes/pi-1tb/torrents:/data/torrents
+      - ~/sync/books:/data/books
+
   sonarr:
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
