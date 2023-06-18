@@ -19,3 +19,8 @@ services:
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
       - /Volumes/pi-4tb/movies:/data/media/movies
+
+  sonarr:
+    volumes:
+      - /Volumes/pi-1tb/torrents:/data/torrents
+      - /Volumes/pi-4tb/shows:/data/media/shows

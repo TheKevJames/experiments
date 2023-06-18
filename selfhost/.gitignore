@@ -26,3 +26,5 @@ qbittorrent/config/rss/storage.lock
 qbittorrent/data/*
 radarr/*
 !radarr/config.xml
+sonarr/*
+!sonarr/config.xml

@@ -93,3 +93,21 @@ services:
       - /mnt/1tb/torrents:/data/torrents
       - /mnt/4tb/movies:/data/media/movies
       - ./radarr:/config:Z
+
+  sonarr:
+    profiles:
+      - pi-1
+    container_name: sonarr
+    image: lscr.io/linuxserver/sonarr:latest
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Etc/UTC
+      - UMASK=002
+    volumes:
+      - /mnt/1tb/torrents:/data/torrents
+      - /mnt/4tb/shows:/data/media/shows
+      - ./sonarr:/config:Z
