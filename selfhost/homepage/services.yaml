@@ -53,6 +53,20 @@
         server: docker-local
         container: prowlarr
 
+- Misc:
+    - Calibre-Web:
+        href: http://192.168.1.64:8083/
+        description: E-Book Manager Frontend
+        icon: calibre-web
+        server: docker-local
+        container: calibre-web
+    - Calibre:
+        href: http://192.168.1.64:8080/
+        description: E-Book Manager
+        icon: calibre
+        server: docker-local
+        container: calibre
+
 - Networking:
     - Pi-Hole:
         href: http://192.168.1.71/admin/

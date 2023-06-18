@@ -1,3 +1,6 @@
+# TODO: is any calibre/ stuff backup-able?
+calibre/*
+calibre-web/*
 hass/*.db
 hass/*.db-shm
 hass/*.db-wal

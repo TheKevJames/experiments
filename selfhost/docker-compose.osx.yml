@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  calibre:
+    volumes:
+      - ~/sync/books:/data/books
+
+  calibre-web:
+    volumes:
+      - ~/sync/books:/data/books
+
   homepage:
     volumes:
       - /Volumes/pi-1tb:/mnt/1tb
