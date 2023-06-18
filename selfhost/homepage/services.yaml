@@ -1,4 +1,24 @@
 ---
+- Control:
+    - HASS:
+        href: http://192.168.1.64:8123/
+        description: Home Assistant
+        icon: home-assistant
+        server: docker-local
+        container: hass
+    - Homepage:
+        href: http://192.168.1.64:3000/
+        description: Homepage on applebox
+        icon: mdi-home-circle
+        server: docker-local
+        container: homepage
+    - Homepage:
+        href: http://192.168.1.71:3000/
+        description: Homepage on pi-1
+        icon: mdi-home-circle
+        server: docker-local
+        container: homepage
+
 - Media:
     - Jellyfin:
         href: http://192.168.1.64:8096/
@@ -33,26 +53,6 @@
         server: docker-local
         container: prowlarr
 
-- Infrastructure:
-    - HASS:
-        href: http://192.168.1.64:8123/
-        description: Home Assistant
-        icon: home-assistant
-        server: docker-local
-        container: hass
-    - Homepage:
-        href: http://192.168.1.64:3000/
-        description: Homepage on applebox
-        icon: mdi-home-circle
-        server: docker-local
-        container: homepage
-    - Homepage:
-        href: http://192.168.1.71:3000/
-        description: Homepage on pi-1
-        icon: mdi-home-circle
-        server: docker-local
-        container: homepage
-
 - Networking:
     - Pi-Hole:
         href: http://192.168.1.71/admin/
@@ -65,3 +65,17 @@
         href: http://192.168.1.1/
         description: Router Admin Portal
         icon: router
+
+- Services:
+    - Syncthing:
+        href: http://192.168.1.64:8384/
+        description: Syncthing on applebox
+        icon: syncthing
+        server: docker-local
+        container: syncthing
+    - Syncthing:
+        href: http://192.168.1.71:8384/
+        description: Syncthing on pi-1
+        icon: syncthing
+        server: docker-local
+        container: syncthing

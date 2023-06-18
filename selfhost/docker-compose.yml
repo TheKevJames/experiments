@@ -111,3 +111,21 @@ services:
       - /mnt/1tb/torrents:/data/torrents
       - /mnt/4tb/shows:/data/media/shows
       - ./sonarr:/config:Z
+
+  syncthing:
+    container_name: syncthing
+    image: lscr.io/linuxserver/syncthing:latest
+    ports:
+      - 8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    restart: unless-stopped
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Etc/UTC
+      - UMASK=002
+    volumes:
+      - /mnt/4tb/sync:/data/sync
+      - ./syncthing:/config:Z

@@ -28,3 +28,4 @@ radarr/*
 !radarr/config.xml
 sonarr/*
 !sonarr/config.xml
+syncthing/*

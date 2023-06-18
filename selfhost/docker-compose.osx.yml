@@ -24,3 +24,7 @@ services:
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
       - /Volumes/pi-4tb/shows:/data/media/shows
+
+  syncthing:
+    volumes:
+      - ~/sync:/data/sync
