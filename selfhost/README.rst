@@ -33,6 +33,7 @@ Drives`_ first, then you can do the following:
     # follow the visual prompts
     $ curl -sSL https://install.pi-hole.net | bash
     # set your admin panel password, if you enabled it
+    $ echo "server.port := 8000" | sudo tee /etc/lighttpd/external.conf
     $ sudo pihole -a -p
 
     # verify it's working at the web portal and with:
