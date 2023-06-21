@@ -1,0 +1,7 @@
+tunnel: b5214e1c-d1c5-4bc0-8cf4-f7c82526555f
+credentials-file: /home/nonroot/.cloudflared/b5214e1c-d1c5-4bc0-8cf4-f7c82526555f.json
+
+ingress:
+  - hostname: "*.thekev.in"
+    service: http://caddy:80
+  - service: http_status:404

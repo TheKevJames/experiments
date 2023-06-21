@@ -1,0 +1,64 @@
+{
+    order authenticate before respond
+    order authorize before basicauth
+
+    security {
+        oauth identity provider google {
+            realm google
+            driver google
+            client_id {env.GOOGLE_CLIENT_ID}
+            client_secret {env.GOOGLE_CLIENT_SECRET}
+            scopes openid email profile
+        }
+
+        authentication portal myportal {
+            enable identity provider google
+            cookie domain thekev.in
+
+            ui {
+                links {
+                    "My Identity" /whoami icon "las la-user"
+                }
+            }
+
+            transform user {
+                suffix match email @thekev.in
+                action add role thekev/admin
+            }
+            transform user {
+                exact match email kevin.j.carruthers@gmail.com
+                action add role thekev/admin
+            }
+        }
+
+        authorization policy meonly {
+            set auth url https://auth.thekev.in/
+
+            acl rule {
+                comment allow thekev admins and users
+                match roles thekev/admin thekev/user
+                allow stop log info
+            }
+
+            acl rule {
+                comment default deny
+                match any
+                deny log warn
+            }
+        }
+    }
+}
+
+http://auth.thekev.in {
+    authenticate with myportal
+}
+
+# TODO: expose everything
+http://home.thekev.in {
+    reverse_proxy homepage:3000
+}
+
+http://pihole.thekev.in {
+    authorize with meonly
+    reverse_proxy http://192.168.1.71:8000
+}

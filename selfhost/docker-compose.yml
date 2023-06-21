@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  caddy:
+    # TODO: better way of specififying profiles, syncing with IPs, etc
+    profiles:
+      - applebox
+    image: quay.io/thekevjames/caddy-security:2.6.4-1.1.19
+    command: caddy run --config /config/caddy/Caddyfile --adapter caddyfile
+    container_name: caddy
+    restart: unless-stopped
+    env_file:
+      - ./secrets/google.env
+    volumes:
+      - ./caddy:/config/caddy:Z
+
   calibre:
     profiles:
       - applebox
@@ -37,6 +50,17 @@ services:
     volumes:
       - /mnt/4tb/sync/books:/data/books
       - ./calibre-web:/config:Z
+
+  # TODO: configure ssh tunneling
+  cloudflared:
+    profiles:
+      - applebox
+    image: docker.io/cloudflare/cloudflared:latest
+    command: tunnel run
+    container_name: cloudflared
+    restart: unless-stopped
+    volumes:
+      - ./cloudflared:/home/nonroot/.cloudflared:Z
 
   hass:
     profiles:

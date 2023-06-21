@@ -15,6 +15,12 @@ down:
 ps:
 	$(COMPOSE) --profile=$(shell hostname) ps
 pull:
-	$(COMPOSE) --profile=$(shell hostname) pull
+	$(COMPOSE) --profile=$(shell hostname) pull $(SERVICE)
+restart:
+	$(COMPOSE) --profile=$(shell hostname) restart $(SERVICE)
+start:
+	$(COMPOSE) --profile=$(shell hostname) start $(SERVICE)
+stop:
+	$(COMPOSE) --profile=$(shell hostname) stop $(SERVICE)
 up:
 	$(COMPOSE) --profile=$(shell hostname) up -d

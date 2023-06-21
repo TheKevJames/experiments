@@ -1,3 +1,4 @@
+# TODO: service widgets (require auth, plaintext in this file :()
 ---
 - Control:
     - HASS:
@@ -78,15 +79,23 @@
         href: http://192.168.1.71:8000/admin/
         description: Pi-Hole Admin Portal
         icon: pi-hole
-        widget:
-            type: pihole
-            url: http://192.168.1.71:8000
     - Router:
         href: http://192.168.1.1/
         description: Router Admin Portal
         icon: router
 
 - Services:
+    - Caddy:
+        href: https://auth.thekev.in/
+        description: Secure Reverse Proxy
+        icon: caddy
+        server: docker-local
+        container: syncthing
+    - Cloudflared:
+        description: DNS Tunnel
+        icon: cloudflare-zero-trust
+        server: docker-local
+        container: cloudflared
     - Syncthing:
         href: http://192.168.1.64:8384/
         description: Syncthing on applebox

@@ -92,9 +92,23 @@ Drives`_ first, then you can do the following:
     # restore any backups (gitignore'd by default!)
     # scp FOO pi@pihole:~/src/experiments/selfhost/hass/
 
+    # properly set up secrets
+    # TODO: use docker secrets, unify management
+    $ echo 'GOOGLE_CLIENT_ID="..."' >> secrets/google.env
+    $ echo 'GOOGLE_CLIENT_SECRET="..."' >> secrets/google.env
+
+    # generate secrets
+    $ docker run --rm -it -v $PWD/cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared:latest tunnel login
+    $ docker run --rm -it -v $PWD/cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared:latest tunnel create selfhost
+    # modify cloudflared/config.yml with the new UUID
+    # TODO: the dns stuff could be a startupcontainer of some sort? Run-once jobs?
+    $ docker run --rm -it -v $PWD/cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared:latest tunnel route dns selfhost example.com
+    $ docker run --rm -it -v $PWD/cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared:latest tunnel route dns selfhost foo.example.com
+    $ docker run --rm -it -v $PWD/cloudflared:/home/nonroot/.cloudflared cloudflare/cloudflared:latest tunnel route dns selfhost bar.example.com
+
     # start images
-    $ docker compose pull
-    $ docker compose --profile=$(hostname) up -d
+    $ make pull
+    $ make up -d
 
     # setup the admin account, unless you restored from a backup
     # visit http://pi.hole:8123/
@@ -145,8 +159,8 @@ To update the various components:
 
     cd ~/src/experiments/selfhost
     git pull
-    docker compose --profile=$(hostname) pull
-    docker compose --profile=$(hostname) up -d
+    make pull
+    make up -d
 
 Mounting External Disks
 -----------------------
@@ -183,17 +197,5 @@ Quick walkthrough of how to fstab some external drives into being auto-mounted:
 
     # mount 'em now
     $ sudo mount -a
-
-TODOs
------
-
-* hass > gcp?
-* hass > gcal
-* hass > spotify
-* need to actually fixup the ``home.thekev.in`` mapping. Does HASS' cloudflare
-  integration solve those issues? How can I make that work with the multiple
-  Pi's handling different svcs on different ports?
-* move pi to different port, make homepage :80
-* move to exclusively linuxserver.io images
 
 .. _Install Raspbian OS Lite x64: https://www.raspberrypi.com/software/
