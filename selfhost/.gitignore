@@ -25,6 +25,7 @@ jellyfin/data/metadata/*
 jellyfin/data/transcodes/*
 jellyfin/dlna/*
 jellyfin/log/*
+mosura/*
 prowlarr/*
 !prowlarr/config.xml
 qbittorrent/cache/*

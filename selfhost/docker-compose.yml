@@ -1,5 +1,17 @@
 version: '3.8'
 
+secrets:
+  jira_auth_token:
+    file: ./mosura/jira_auth_token
+  jira_auth_user:
+    file: ./mosura/jira_auth_user
+  jira_domain:
+    file: ./mosura/jira_domain
+  jira_label_okr:
+    file: ./mosura/jira_label_okr
+  jira_project:
+    file: ./mosura/jira_project
+
 services:
   caddy:
     # TODO: better way of specififying profiles, syncing with IPs, etc
@@ -103,6 +115,25 @@ services:
       - /mnt/4tb/movies:/data/media/movies
       - /mnt/4tb/shows:/data/media/shows
       - ./jellyfin:/config:Z
+
+  mosura:
+    profiles:
+      - applebox
+    image: quay.io/thekevjames/mosura:latest
+    container_name: mosura
+    restart: unless-stopped
+    environment:
+      - MOSURA_HEADER_USER_EMAIL=X-Token-User-Email
+      - MOSURA_PORT=8080
+      - MOSURA_APPDATA=/data
+    secrets:
+      - jira_auth_token
+      - jira_auth_user
+      - jira_domain
+      - jira_label_okr
+      - jira_project
+    volumes:
+      - ./mosura:/data:Z
 
   prowlarr:
     profiles:

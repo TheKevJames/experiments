@@ -29,6 +29,28 @@
                 exact match email kevin.j.carruthers@gmail.com
                 action add role thekev/admin
             }
+
+            transform user {
+                suffix match email @dialpad.com
+                action add role mosura/user
+            }
+        }
+
+        authorization policy mosura {
+            set auth url https://auth.thekev.in/
+            inject headers with claims
+
+            acl rule {
+                comment allow mosura users
+                match roles mosura/user
+                allow stop log info
+            }
+
+            acl rule {
+                comment default deny
+                match any
+                deny log warn
+            }
         }
 
         authorization policy meonly {
@@ -56,6 +78,11 @@ http://auth.thekev.in {
 # TODO: expose everything
 http://home.thekev.in {
     reverse_proxy homepage:3000
+}
+
+http://mosura.thekev.in {
+    authorize with mosura
+    reverse_proxy mosura:8080
 }
 
 http://pihole.thekev.in {
