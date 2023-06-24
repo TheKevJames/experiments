@@ -83,19 +83,24 @@
         href: http://192.168.1.1/
         description: Router Admin Portal
         icon: router
+    - Cloudflared:
+        description: DNS Tunnel
+        icon: cloudflare-zero-trust
+        server: docker-local
+        container: cloudflared
 
 - Services:
+    - Mosura:
+        href: https://mosura.thekev.in/
+        description: Task Management Frontend
+        server: docker-local
+        container: mosura
     - Caddy:
         href: https://auth.thekev.in/
         description: Secure Reverse Proxy
         icon: caddy
         server: docker-local
         container: syncthing
-    - Cloudflared:
-        description: DNS Tunnel
-        icon: cloudflare-zero-trust
-        server: docker-local
-        container: cloudflared
     - Syncthing:
         href: http://192.168.1.64:8384/
         description: Syncthing on applebox
