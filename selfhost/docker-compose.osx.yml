@@ -2,10 +2,16 @@ version: '3.8'
 
 services:
   calibre:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - ~/sync/books:/data/books
 
   calibre-web:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - ~/sync/books:/data/books
 
@@ -15,29 +21,52 @@ services:
       - /Volumes/pi-4tb:/mnt/4tb
 
   jellyfin:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - /Volumes/pi-4tb/movies:/data/media/movies
       - /Volumes/pi-4tb/shows:/data/media/shows
 
+  prowlarr:
+    environment:
+      - PGID=503
+      - PUID=20
+
   qbittorrent:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
 
   radarr:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
       - /Volumes/pi-4tb/movies:/data/media/movies
 
   readarr:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
       - ~/sync/books:/data/books
 
   sonarr:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
       - /Volumes/pi-4tb/shows:/data/media/shows
 
   syncthing:
+    environment:
+      - PGID=503
+      - PUID=20
     volumes:
       - ~/sync:/data/sync
