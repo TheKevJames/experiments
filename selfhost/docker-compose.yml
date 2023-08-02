@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.8'  # TODO: bump
 
 secrets:
   jira_auth_token:
@@ -25,43 +25,6 @@ services:
       - ./secrets/google.env
     volumes:
       - ./caddy:/config/caddy:Z
-
-  calibre:
-    profiles:
-      - applebox
-    container_name: calibre
-    image: lscr.io/linuxserver/calibre:latest
-    ports:
-      - 8080:8080
-      - 8081:8081
-      - 8181:8181
-    restart: unless-stopped
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Etc/UTC
-      - UMASK=002
-    volumes:
-      - /mnt/4tb/sync/books:/data/books
-      - ./calibre:/config:Z
-
-  calibre-web:
-    profiles:
-      - applebox
-    container_name: calibre-web
-    image: lscr.io/linuxserver/calibre-web:latest
-    ports:
-      - 8083:8083
-    restart: unless-stopped
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Etc/UTC
-      - UMASK=002
-      - DOCKER_MODS=linuxserver/mods:universal-calibre|linuxserver/mods:calibre-web-dtrpg-metadata
-    volumes:
-      - /mnt/4tb/sync/books:/data/books
-      - ./calibre-web:/config:Z
 
   # TODO: configure ssh tunneling
   cloudflared:
@@ -187,24 +150,6 @@ services:
       - /mnt/1tb/torrents:/data/torrents
       - /mnt/4tb/movies:/data/media/movies
       - ./radarr:/config:Z
-
-  readarr:
-    profiles:
-      - applebox
-    container_name: readarr
-    image: lscr.io/linuxserver/readarr:develop
-    ports:
-      - 8787:8787
-    restart: unless-stopped
-    environment:
-      - PGID=1000
-      - PUID=1000
-      - TZ=Etc/UTC
-      - UMASK=002
-    volumes:
-      - /mnt/1tb/torrents:/data/torrents
-      - /mnt/4tb/sync/books:/data/books
-      - ./readarr:/config:Z
 
   sonarr:
     profiles:

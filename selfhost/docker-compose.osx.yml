@@ -1,20 +1,6 @@
 version: '3.8'
 
 services:
-  calibre:
-    environment:
-      - PGID=503
-      - PUID=20
-    volumes:
-      - ~/sync/books:/data/books
-
-  calibre-web:
-    environment:
-      - PGID=503
-      - PUID=20
-    volumes:
-      - ~/sync/books:/data/books
-
   homepage:
     volumes:
       - /Volumes/pi-1tb:/mnt/1tb
@@ -47,14 +33,6 @@ services:
     volumes:
       - /Volumes/pi-1tb/torrents:/data/torrents
       - /Volumes/pi-4tb/movies:/data/media/movies
-
-  readarr:
-    environment:
-      - PGID=503
-      - PUID=20
-    volumes:
-      - /Volumes/pi-1tb/torrents:/data/torrents
-      - ~/sync/books:/data/books
 
   sonarr:
     environment:

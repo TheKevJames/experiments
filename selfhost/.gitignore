@@ -1,9 +1,6 @@
 # TODO: split config/data folders, consider putting data folders in volumes
 caddy/*
 !caddy/Caddyfile
-# TODO: is any calibre/ stuff backup-able?
-calibre/*
-calibre-web/*
 cloudflared/*
 !cloudflared/config.yml
 hass/*.db
@@ -33,8 +30,6 @@ qbittorrent/config/rss/storage.lock
 qbittorrent/data/*
 radarr/*
 !radarr/config.xml
-readarr/*
-!readarr/config.xml
 secrets/*
 sonarr/*
 !sonarr/config.xml
