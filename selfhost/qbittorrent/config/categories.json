@@ -1,4 +1,7 @@
 {
+    "books": {
+        "save_path": "/data/torrents/books"
+    },
     "movies": {
         "save_path": "/data/torrents/movies"
     },
