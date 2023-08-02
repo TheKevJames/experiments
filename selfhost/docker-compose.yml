@@ -102,8 +102,10 @@ services:
     profiles:
       - applebox
     container_name: jellyfin
-    image: ghcr.io/hotio/jellyfin:release
+    image: lscr.io/linuxserver/jellyfin:latest
     ports:
+      - 1900:1900/udp
+      - 7359:7359/udp
       - 8096:8096
     restart: unless-stopped
     environment:

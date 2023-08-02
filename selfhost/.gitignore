@@ -18,12 +18,10 @@ hass/ip_bans.yaml
 hass/known_devices.yaml
 hass/secrets.yaml
 homepage/logs/*
-jellyfin/.cache/*
 jellyfin/cache/*
 jellyfin/data/data/*
 jellyfin/data/metadata/*
 jellyfin/data/transcodes/*
-jellyfin/dlna/*
 jellyfin/log/*
 mosura/*
 prowlarr/*

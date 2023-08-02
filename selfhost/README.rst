@@ -136,6 +136,7 @@ Drives`_ first, then you can do the following:
     #   create mask = 6444
     #   directory mask = 0755
     #   force user = pi
+    #   force group = pi
 
     # create a samba user
     # eg. username is "pi"
@@ -143,7 +144,6 @@ Drives`_ first, then you can do the following:
 
     # restart samba
     sudo systemctl restart smbd
-
 
 Updates
 -------
@@ -197,5 +197,21 @@ Quick walkthrough of how to fstab some external drives into being auto-mounted:
 
     # mount 'em now
     $ sudo mount -a
+
+Connect to Samba Shares
+-----------------------
+
+To mount samba shares on OSX clients, note that the permissions the server
+grants and the permissions OSX *thinks* it has don't tend to stay in sync very
+well. The best thing I've found to deal with this so far is to force OSX to
+think it has 0777 -- it won't, the real permissions will be controlled by the
+samba settings above as they are for all other clients, but at least OSX won't
+get in the way.
+
+.. code-block:: console
+
+    sudo mkdir /Volumes/pi-1tb
+    sudo chown -R 0777 /Volumes/pi-1tb
+    sudo mount_smbfs -N -d 0777 -f 0777 //guest@pi-1/pi-1tb /Volumes/pi-1tb
 
 .. _Install Raspbian OS Lite x64: https://www.raspberrypi.com/software/

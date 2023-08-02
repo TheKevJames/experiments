@@ -2,14 +2,13 @@
 <ServerConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <LogFileRetentionDays>3</LogFileRetentionDays>
   <IsStartupWizardCompleted>true</IsStartupWizardCompleted>
-  <CachePath>/config/cache</CachePath>
   <EnableMetrics>false</EnableMetrics>
   <EnableNormalizedItemByNameIds>true</EnableNormalizedItemByNameIds>
   <IsPortAuthorized>true</IsPortAuthorized>
   <QuickConnectAvailable>true</QuickConnectAvailable>
   <EnableCaseSensitiveItemIds>true</EnableCaseSensitiveItemIds>
   <DisableLiveTvChannelUserDataName>true</DisableLiveTvChannelUserDataName>
-  <MetadataPath>/config/data/metadata</MetadataPath>
+  <MetadataPath />
   <MetadataNetworkPath />
   <PreferredMetadataLanguage>en</PreferredMetadataLanguage>
   <MetadataCountryCode>US</MetadataCountryCode>
@@ -130,7 +129,7 @@
     </MetadataOptions>
   </MetadataOptions>
   <SkipDeserializationForBasicTypes>true</SkipDeserializationForBasicTypes>
-  <ServerName>applebox</ServerName>
+  <ServerName />
   <UICulture>en-US</UICulture>
   <SaveMetadataHidden>false</SaveMetadataHidden>
   <ContentTypes />
@@ -150,7 +149,7 @@
   <ImageExtractionTimeoutMs>0</ImageExtractionTimeoutMs>
   <PathSubstitutions />
   <EnableSlowResponseWarning>true</EnableSlowResponseWarning>
-  <SlowResponseThresholdMs>500</SlowResponseThresholdMs>
+  <SlowResponseThresholdMs>1000</SlowResponseThresholdMs>
   <CorsHosts>
     <string>*</string>
   </CorsHosts>
