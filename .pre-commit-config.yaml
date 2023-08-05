@@ -20,10 +20,8 @@ repos:
     -   id: check-xml
     -   id: check-yaml
         args: [--allow-multiple-documents]
-        exclude: selfhost/hass/.*  # TODO
     -   id: detect-private-key
     -   id: end-of-file-fixer
-        exclude: selfhost/.*  # TODO
     -   id: mixed-line-ending
         args: [--fix=lf]
     -   id: trailing-whitespace
