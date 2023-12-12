@@ -3,7 +3,7 @@ name = "testapi"
 version = "0.0.0"
 description = ""
 
-repository = ""
+repository = "https://github.com/TheKevJames/experiments"
 authors = ["Kevin James <KevinJames@thekev.in>"]
 license = "MIT"
 
