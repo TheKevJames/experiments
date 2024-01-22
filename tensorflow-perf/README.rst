@@ -11,7 +11,7 @@ We're starting with the `g2p_en`_ library, with the version released just prior
 to their move from Tensorflow to NumPy (commit: 7caf9d69). Not encoded in this
 initial commit are the following changes:
 
-- some refactors for running in Python 3.x: relative imports, inheritence, etc
+- some refactors for running in Python 3.x: relative imports, inheritance, etc
 - removal of all training-specific code; we're only looking to optimize
   inference here
 - CPU-only configuration; since I'm curious to see what the maximum performance

@@ -46,7 +46,7 @@ There are a few things that I think the below `Results`_ point to:
   do want to mention that (**purely subjectively**) it felt like the 99th was
   always much better in cases where I immediately re-ran test cases rather
   than pausing a bit between them; to me, that implies there's a definite
-  corrolation between the 99th percentile and the spin up time I already
+  correlation between the 99th percentile and the spin up time I already
   mentioned above. Results may be better than they appear?
 
 * Using a synchronous subscription strategy was... hard. By the time you start

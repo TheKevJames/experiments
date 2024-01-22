@@ -13,7 +13,7 @@ from sanic.response import HTTPResponse
 
 
 # In order for a client to make a request, it must know the target GCP project,
-# API service, and API route, and be listed as a KMS encrypter for that
+# API service, and API route, and be listed as a KMS encryptor for that
 # combination. For human-used APIs, that means giving that access to either
 # individual users or their groups, depending on our usage.
 #
@@ -62,7 +62,7 @@ app = sanic.Sanic()
 # This is a demo of the helper function used on the server side of things (eg.
 # within Cloud Run) in order to verify incoming requests. You'd want to call
 # this immediately when a new request is received (or build it as a decorator,
-# or whatever you're prefered style is).
+# or whatever you're preferred style is).
 async def verify_auth(route: str, headers: dict) -> None:
     kind, token = headers.get('Authorization', 'no auth').split()
     if kind != 'Bearer':
