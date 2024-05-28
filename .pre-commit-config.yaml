@@ -120,7 +120,7 @@ repos:
         - flake8-comprehensions==3.14.0
         - flake8-typing-imports==1.15.0
   - repo: https://github.com/hhatto/autopep8
-    rev: v2.1.0
+    rev: v2.1.1
     hooks:
       - id: autopep8
         args: [-a, -i, -p2]
