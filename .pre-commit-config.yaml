@@ -12,11 +12,11 @@ default_language_version:
 
 repos:
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v3.4.0
+    rev: v3.6.0
     hooks:
       - id: conventional-pre-commit
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-case-conflict
       - id: check-executables-have-shebangs
@@ -188,7 +188,7 @@ repos:
 
 # json
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.29.2
+    rev: 0.29.4
     hooks:
       - id: check-github-workflows
       - id: check-renovate
