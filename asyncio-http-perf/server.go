@@ -1,15 +1,15 @@
 package main
 
 import (
-	"io"
-	"log"
-	"net/http"
+    "io"
+    "log"
+    "net/http"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "OK\n")
-	})
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        io.WriteString(w, "OK\n")
+    })
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }
