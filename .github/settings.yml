@@ -16,8 +16,8 @@ repository:
   allow_rebase_merge: true
   allow_squash_merge: true
 
-  enable_automated_security_fixes: false
-  enable_vulnerability_alerts: false
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
 
 # TODO: https://github.com/marketplace/actions/label-sync
 labels:
