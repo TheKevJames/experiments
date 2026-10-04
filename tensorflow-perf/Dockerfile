@@ -1,4 +1,4 @@
-FROM python:3.7.3-stretch
+FROM python:3.6.15-alpine3.15
 
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update && \
