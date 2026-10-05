@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1.27
 FROM python:3.7.13-slim AS base
 
 RUN apt-get update -qy && \
