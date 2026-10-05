@@ -2,4 +2,5 @@
     "extends": [
         "github>thekevjames/tools:personal",
     ],
+    "enabled": false,
 }
