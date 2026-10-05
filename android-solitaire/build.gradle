@@ -50,7 +50,7 @@ ext {
     compileSdkVersion = 32
 
     accompanistVersion = '0.23.1'
-    activityComposeVersion = '1.4.0'
+    activityComposeVersion = '1.13.0'
     androidXVersion = '1.0.0'
     androidXTestCoreVersion = '1.4.1-alpha06'
     androidXTestExtKotlinRunnerVersion = '1.1.4-alpha06'
