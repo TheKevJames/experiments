@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlinVersion = '1.7.0'
-    ext.navigationVersion = '2.5.0'
+    ext.navigationVersion = '2.10.2'
     ext.ktlintVersion = '0.44.0'
     ext.hiltVersion = '2.42'
 
