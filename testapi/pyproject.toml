@@ -12,7 +12,7 @@ python = ">=3.7,<4.0"
 fastapi = "0.75.0"
 httptools = "0.4.0"
 uvicorn = "0.17.6"
-uvloop = "0.16.0"
+uvloop = "0.23.0"
 
 [tool.poetry.dev-dependencies]
 httpx = "0.23.0"
