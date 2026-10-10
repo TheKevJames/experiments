@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:bookworm
 
 RUN apt-get -qy update && \
     apt-get -qy install --no-install-recommends \
