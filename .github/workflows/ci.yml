@@ -12,11 +12,11 @@ jobs:
         with:
           enable-cache: false
           # renovate: datasource=github-releases depName=astral-sh/uv
-          version: 0.12.24
+          version: 0.13.0
           # renovate: datasource=docker depName=python
-          python-version: 3.14.7
+          python-version: 3.14.8
       - uses: j178/prek-action@v3.0.1
         with:
           # renovate: datasource=pypi depName=prek
           prek-version: v0.5.5
-          extra-args: --all-files
+          extra-args: --all-files --show-diff-on-failure
