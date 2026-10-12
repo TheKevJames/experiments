@@ -19,4 +19,4 @@ jobs:
         with:
           # renovate: datasource=pypi depName=prek
           prek-version: v0.5.5
-          extra-args: --all-files --show-diff-on-failure
+          extra-args: --all-files
